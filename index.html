@@ -19,6 +19,24 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Coming Soon Banner */
+    .coming-soon {
+      font-weight: 700;
+      color: #ffffff;
+      background: linear-gradient(90deg, #0078d4, #2899f5);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 18px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.85; }
     }
 
     .box {
@@ -88,6 +106,9 @@
   </style>
 </head>
 <body>
+
+  <!-- Coming Soon Banner -->
+  <div class="coming-soon">BongTools V2 – Coming Soon 🚀</div>
 
   <div class="box">
     <h2>Bong Number Generator</h2>
