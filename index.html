@@ -2,71 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bong Number Generator</title>
+  <title>BongTools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * {
-      box-sizing: border-box;
-      transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
-    }
+    * { box-sizing: border-box; transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s; }
     body {
       margin: 0;
       font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-      background: #f3f6fb;
-      color: #111;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      flex-direction: column;
-      gap: 20px;
+      background: #f3f6fb; color: #111;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; flex-direction: column; gap: 20px;
       padding: 60px 16px 40px;
     }
-
-    body.dark {
-      background: #0f1117;
-      color: #e8eaf0;
-    }
-    body.dark .box {
-      background: #1a1d27;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    }
-    body.dark input {
-      background: #252836;
-      border-color: #3a3f55;
-      color: #e8eaf0;
-    }
-    body.dark input:focus { border-color: #2899f5; }
-    body.dark input::placeholder { color: #666e8a; }
+    body.dark { background: #0f1117; color: #e8eaf0; }
+    body.dark .box { background: #1a1d27; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    body.dark input, body.dark textarea { background: #252836; border-color: #3a3f55; color: #e8eaf0; }
+    body.dark input:focus, body.dark textarea:focus { border-color: #2899f5; }
+    body.dark input::placeholder, body.dark textarea::placeholder { color: #666e8a; }
 
     .toggle-btn {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      background: none;
-      border: 1.5px solid #d0d7e2;
-      border-radius: 50px;
-      padding: 6px 14px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      color: #444;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      width: auto;
+      position: fixed; top: 16px; right: 16px; background: none;
+      border: 1.5px solid #d0d7e2; border-radius: 50px; padding: 6px 14px;
+      cursor: pointer; font-size: 14px; font-weight: 600; color: #444;
+      display: flex; align-items: center; gap: 6px; width: auto;
     }
     .toggle-btn:hover { background: #e8eef8; }
     body.dark .toggle-btn { border-color: #3a3f55; color: #aab0c8; background: none; }
     body.dark .toggle-btn:hover { background: #252836; }
 
     .coming-soon {
-      font-weight: 700;
-      color: #ffffff;
+      font-weight: 700; color: #fff;
       background: linear-gradient(90deg, #0078d4, #2899f5);
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-size: 18px;
+      padding: 10px 20px; border-radius: 12px; font-size: 18px;
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse {
@@ -75,34 +42,16 @@
     }
 
     .box {
-      background: #ffffff;
-      border-radius: 14px;
-      width: 100%;
-      max-width: 340px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      text-align: center;
-      overflow: hidden;
+      background: #fff; border-radius: 14px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; overflow: hidden;
     }
 
-    /* Tabs */
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid #e4e8f0;
-    }
+    .tabs { display: flex; border-bottom: 1px solid #e4e8f0; }
     body.dark .tabs { border-bottom-color: #2a2e3d; }
-
     .tab {
-      flex: 1;
-      padding: 13px 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      background: none;
-      color: #888;
-      border-radius: 0;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
+      flex: 1; padding: 13px 6px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; background: none; color: #888;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
       transition: color 0.2s, background 0.2s;
     }
     .tab:hover { background: #f3f6fb; color: #444; }
@@ -110,100 +59,107 @@
     .tab.active { color: #0078d4; border-bottom: 2px solid #0078d4; background: none; }
     body.dark .tab.active { color: #2899f5; border-bottom-color: #2899f5; }
 
-    .tab-panel { display: none; padding: 24px; }
-    .tab-panel.active { display: block; }
+    .tab-panel { display: none; padding: 24px; flex-direction: column; }
+    .tab-panel.active { display: flex; }
 
     h2 { margin-top: 0; margin-bottom: 20px; font-weight: 600; }
 
-    .inputs { display: flex; gap: 10px; margin-bottom: 16px; width: 100%; }
-    input {
-      width: 100%;
-      padding: 10px;
-      font-size: 15px;
-      border-radius: 10px;
-      border: 1px solid #d0d7e2;
-      outline: none;
-      background: #fff;
-      color: #111;
+    .inputs { display: flex; gap: 10px; margin-bottom: 16px; }
+    input[type="number"] {
+      width: 100%; padding: 10px; font-size: 15px; border-radius: 10px;
+      border: 1px solid #d0d7e2; outline: none; background: #fff; color: #111;
     }
-    input:focus { border-color: #0078d4; }
+    input[type="number"]:focus { border-color: #0078d4; }
 
     button.action-btn {
-      width: 100%;
-      padding: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      background: #0078d4;
-      color: white;
-      transition: background 0.2s;
+      width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+      border-radius: 10px; border: none; cursor: pointer;
+      background: #0078d4; color: white; transition: background 0.2s;
     }
     button.action-btn:hover { background: #106ebe; }
     button.action-btn:disabled { background: #7ab5e0; cursor: not-allowed; }
 
-    #result {
-      margin-top: 18px;
-      font-size: 32px;
-      font-weight: 700;
-      min-height: 40px;
-      color: #0078d4;
-    }
+    #result { margin-top: 18px; font-size: 32px; font-weight: 700; min-height: 40px; color: #0078d4; }
     body.dark #result { color: #2899f5; }
     .error { color: #d13438; font-size: 16px; }
 
     /* Coin */
-    .coin-scene {
-      perspective: 600px;
-      width: 100px;
-      height: 100px;
-      margin: 8px auto 0;
-    }
-    .coin {
-      width: 100px;
-      height: 100px;
-      position: relative;
-      transform-style: preserve-3d;
-    }
+    .coin-scene { perspective: 600px; width: 100px; height: 100px; margin: 8px auto 0; }
+    .coin { width: 100px; height: 100px; position: relative; transform-style: preserve-3d; }
     .coin.land-heads { transform: rotateY(0deg); }
     .coin.land-tails  { transform: rotateY(180deg); }
-    .coin.flipping {
-      animation: coinFlip 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
+    .coin.flipping { animation: coinFlip 0.9s cubic-bezier(0.4,0,0.2,1) forwards; }
     @keyframes coinFlip {
       0%   { transform: rotateY(0deg) rotateX(0deg); }
       30%  { transform: rotateY(540deg) rotateX(20deg) translateY(-30px); }
       70%  { transform: rotateY(1080deg) rotateX(10deg) translateY(-10px); }
-      100% { transform: rotateY(var(--end-rot, 0deg)) rotateX(0deg); }
+      100% { transform: rotateY(var(--end-rot,0deg)) rotateX(0deg); }
     }
     .coin-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      backface-visibility: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 38px;
-      font-weight: 800;
+      position: absolute; width: 100%; height: 100%; border-radius: 50%;
+      backface-visibility: hidden; display: flex; align-items: center;
+      justify-content: center; font-size: 38px; font-weight: 800;
       border: 4px solid rgba(0,0,0,0.08);
       box-shadow: inset 0 -4px 10px rgba(0,0,0,0.12), inset 0 4px 10px rgba(255,255,255,0.3);
     }
-    .coin-heads { background: linear-gradient(135deg, #f7c948, #e6a817); color: #7a4a00; }
-    .coin-tails  { background: linear-gradient(135deg, #d4d8e0, #b0b6c2); color: #3a3f55; transform: rotateY(180deg); }
-
-    #coin-label {
-      margin-top: 14px;
-      font-size: 22px;
-      font-weight: 700;
-      min-height: 28px;
-      color: #0078d4;
-      letter-spacing: 0.5px;
-    }
+    .coin-heads { background: linear-gradient(135deg,#f7c948,#e6a817); color: #7a4a00; }
+    .coin-tails  { background: linear-gradient(135deg,#d4d8e0,#b0b6c2); color: #3a3f55; transform: rotateY(180deg); }
+    #coin-label { margin-top: 14px; font-size: 22px; font-weight: 700; min-height: 28px; color: #0078d4; }
     body.dark #coin-label { color: #2899f5; }
     #flip-btn { margin-top: 18px; }
+
+    /* Chat */
+    #panel-chat { padding: 0; }
+
+    .chat-messages {
+      height: 300px; overflow-y: auto; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth;
+    }
+    .chat-empty {
+      margin: auto; text-align: center; color: #aaa; font-size: 14px; line-height: 1.8;
+    }
+    body.dark .chat-empty { color: #555; }
+    .chat-empty .big { font-size: 36px; margin-bottom: 6px; }
+
+    .msg {
+      max-width: 82%; padding: 9px 13px; border-radius: 14px;
+      font-size: 14px; line-height: 1.5; word-break: break-word;
+      animation: msgIn 0.18s ease;
+    }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .msg.user { align-self: flex-end; background: #0078d4; color: #fff; border-bottom-right-radius: 4px; }
+    .msg.assistant { align-self: flex-start; background: #f0f3fa; color: #111; border-bottom-left-radius: 4px; }
+    body.dark .msg.assistant { background: #252836; color: #e8eaf0; }
+    .msg.typing { opacity: 0.6; font-style: italic; }
+
+    .chat-input-row {
+      display: flex; gap: 8px; padding: 12px 16px;
+      border-top: 1px solid #e4e8f0;
+    }
+    body.dark .chat-input-row { border-top-color: #2a2e3d; }
+    .chat-input-row textarea {
+      flex: 1; padding: 9px 12px; font-size: 14px; border-radius: 10px;
+      border: 1px solid #d0d7e2; outline: none; resize: none;
+      font-family: inherit; background: #fff; color: #111; line-height: 1.4;
+      max-height: 100px; transition: border-color 0.2s;
+    }
+    .chat-input-row textarea:focus { border-color: #0078d4; }
+    .chat-input-row button {
+      padding: 9px 14px; font-size: 18px; font-weight: 700;
+      border-radius: 10px; border: none; cursor: pointer;
+      background: #0078d4; color: white; width: auto;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .chat-input-row button:hover { background: #106ebe; }
+    .chat-input-row button:disabled { background: #7ab5e0; cursor: not-allowed; }
+
+    .chat-error-banner {
+      margin: 8px 16px 0; padding: 8px 12px;
+      background: #fdf2f2; border: 1px solid #f8c8c8;
+      border-radius: 8px; font-size: 12px; color: #c0392b; display: none;
+    }
+    body.dark .chat-error-banner { background: #2d1a1a; border-color: #5a2a2a; color: #f48a8a; }
   </style>
 </head>
 <body>
@@ -214,6 +170,7 @@
     <div class="tabs">
       <button class="tab active" onclick="switchTab('number', this)">🔢 Number</button>
       <button class="tab" onclick="switchTab('coin', this)">🪙 Coin Flip</button>
+      <button class="tab" onclick="switchTab('chat', this)">🤖 Chat</button>
     </div>
 
     <!-- Number Generator -->
@@ -239,18 +196,35 @@
       <div id="coin-label">—</div>
       <button class="action-btn" id="flip-btn" onclick="flipCoin()">Flip Coin</button>
     </div>
+
+    <!-- Chat -->
+    <div class="tab-panel" id="panel-chat">
+      <div class="chat-error-banner" id="chat-error"></div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-empty" id="chat-empty">
+          <div class="big">🤖</div>
+          Powered by Gemini AI<br>
+          <span style="font-size:12px;color:#bbb;">Ask me anything!</span>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <textarea id="chat-input" rows="1" placeholder="Type a message…" onkeydown="chatKeydown(event)"></textarea>
+        <button onclick="sendMessage()" id="send-btn">➤</button>
+      </div>
+    </div>
   </div>
 
   <script>
+    const PROXY_URL = "https://bong-tools-proxy-w3w3.vercel.app/api/chat";
+
     const toggleBtn = document.getElementById("toggleBtn");
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       document.body.classList.add("dark");
       toggleBtn.textContent = "☀️ Light";
     }
-
     function toggleDark() {
-      const isDark = document.body.classList.toggle("dark");
-      toggleBtn.textContent = isDark ? "☀️ Light" : "🌙 Dark";
+      document.body.classList.toggle("dark");
+      toggleBtn.textContent = document.body.classList.contains("dark") ? "☀️ Light" : "🌙 Dark";
     }
 
     function switchTab(name, el) {
@@ -265,9 +239,7 @@
       const max = Number(document.getElementById("max").value);
       const result = document.getElementById("result");
       if (isNaN(min) || isNaN(max) || min > max) {
-        result.textContent = "Invalid range";
-        result.className = "error";
-        return;
+        result.textContent = "Invalid range"; result.className = "error"; return;
       }
       result.className = "";
       result.textContent = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -295,6 +267,76 @@
         flipping = false;
       }, 950);
     }
+
+    let chatHistory = [];
+
+    function chatKeydown(e) {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    }
+
+    function appendMessage(role, text, isTyping = false) {
+      const container = document.getElementById("chat-messages");
+      const empty = document.getElementById("chat-empty");
+      if (empty) empty.remove();
+      const div = document.createElement("div");
+      div.className = "msg " + role + (isTyping ? " typing" : "");
+      div.textContent = text;
+      if (isTyping) div.id = "typing-indicator";
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return div;
+    }
+
+    function showError(msg) {
+      const banner = document.getElementById("chat-error");
+      banner.textContent = "⚠️ " + msg;
+      banner.style.display = "block";
+      setTimeout(() => banner.style.display = "none", 5000);
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("chat-input");
+      const sendBtn = document.getElementById("send-btn");
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = "";
+      input.style.height = "auto";
+      appendMessage("user", text);
+      chatHistory.push({ role: "user", content: text });
+      sendBtn.disabled = true;
+      const typingEl = appendMessage("assistant", "Thinking…", true);
+
+      try {
+        const res = await fetch(PROXY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: chatHistory })
+        });
+        const data = await res.json();
+        typingEl.remove();
+
+        if (!res.ok) {
+          showError(data.error || "Something went wrong.");
+          chatHistory.pop();
+        } else {
+          appendMessage("assistant", data.reply);
+          chatHistory.push({ role: "assistant", content: data.reply });
+        }
+      } catch (err) {
+        typingEl.remove();
+        showError("Could not reach the server. Please try again.");
+        chatHistory.pop();
+      }
+
+      sendBtn.disabled = false;
+      input.focus();
+    }
+
+    document.getElementById("chat-input").addEventListener("input", function () {
+      this.style.height = "auto";
+      this.style.height = Math.min(this.scrollHeight, 100) + "px";
+    });
   </script>
 </body>
 </html>
