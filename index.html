@@ -43,10 +43,10 @@
 
     .box {
       background: #fff; border-radius: 14px; width: 100%; max-width: 400px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; overflow: visible;
     }
 
-    .tabs { display: flex; border-bottom: 1px solid #e4e8f0; }
+    .tabs { display: flex; border-bottom: 1px solid #e4e8f0; border-radius: 14px 14px 0 0; overflow: hidden; }
     body.dark .tabs { border-bottom-color: #2a2e3d; }
     .tab {
       flex: 1; padding: 13px 6px; font-size: 13px; font-weight: 600;
@@ -109,72 +109,101 @@
     #flip-btn { margin-top: 18px; }
 
     /* Magic 8 Ball */
-    #panel-magic { align-items: center; }
-    #panel-magic h2 { margin-bottom: 8px; }
+    #panel-magic { align-items: center; padding: 16px 16px 20px; }
+    #panel-magic h2 { margin-bottom: 6px; }
 
-    .ball-wrap {
-      position: relative; width: 160px; height: 160px;
-      margin: 8px auto 0; cursor: pointer; user-select: none;
+    /* Physics arena */
+    #magic-arena {
+      width: 100%; aspect-ratio: 1 / 0.75;
+      border-radius: 12px;
+      background: #0a0a14;
+      position: relative; overflow: visible;
+      cursor: grab; touch-action: none;
+      border: 1.5px solid #1e2035;
+      margin-bottom: 4px;
+      margin-top: 8px;
     }
-    .ball-wrap:active .ball-outer { transform: scale(0.95); }
+    body.dark #magic-arena { background: #05050e; border-color: #1a1c2c; }
+    #magic-arena:active { cursor: grabbing; }
 
-    .ball-outer {
-      width: 160px; height: 160px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #3a3a3a, #000 70%);
-      box-shadow:
-        0 8px 32px rgba(0,0,0,0.45),
-        0 2px 8px rgba(0,0,0,0.3),
-        inset 0 -6px 18px rgba(255,255,255,0.04),
-        inset 6px 6px 20px rgba(255,255,255,0.07);
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.12s ease;
-      position: relative; overflow: hidden;
-    }
-
-    /* Glossy highlight */
-    .ball-outer::before {
+    /* Subtle grid floor */
+    #magic-arena::before {
       content: '';
-      position: absolute; top: 14px; left: 28px;
-      width: 48px; height: 28px; border-radius: 50%;
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+
+    #ball-el {
+      position: absolute;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 28%, #3d3d3d, #000 72%);
+      box-shadow:
+        0 8px 32px rgba(0,0,0,0.8),
+        inset 0 -4px 12px rgba(255,255,255,0.04),
+        inset 5px 5px 16px rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center;
+      user-select: none; cursor: grab;
+      will-change: transform;
+      touch-action: none;
+    }
+    #ball-el:active { cursor: grabbing; }
+
+    /* Gloss */
+    #ball-el::before {
+      content: '';
+      position: absolute; top: 12px; left: 20px;
+      width: 36px; height: 20px; border-radius: 50%;
       background: radial-gradient(ellipse, rgba(255,255,255,0.18) 0%, transparent 70%);
       transform: rotate(-20deg);
       pointer-events: none;
     }
 
-    .ball-window {
-      width: 72px; height: 72px; border-radius: 50%;
+    .ball-window-inner {
+      width: 54px; height: 54px; border-radius: 50%;
       background: radial-gradient(circle at 40% 40%, #1a1aff, #000080 60%, #00004a);
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.08), inset 0 2px 6px rgba(0,0,0,0.5);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.08), inset 0 1px 4px rgba(0,0,0,0.6);
+    }
+
+    .magic-answer-inner {
+      font-size: 9px; font-weight: 700; color: #a0c8ff;
+      text-align: center; padding: 3px; line-height: 1.2;
+      text-transform: uppercase; letter-spacing: 0.3px;
+      max-width: 46px;
+      opacity: 0;
+      transition: opacity 0.5s ease 0.1s;
+    }
+    .magic-answer-inner.visible { opacity: 1; }
+
+    /* Answer overlay above arena */
+    #magic-answer-overlay {
+      position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.72); backdrop-filter: blur(6px);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 11px; font-weight: 700; color: #a0c8ff;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      white-space: nowrap; pointer-events: none;
+      opacity: 0; transition: opacity 0.4s;
+    }
+    #magic-answer-overlay.visible { opacity: 1; }
+
+    /* Shadow under ball */
+    #ball-shadow {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      filter: blur(6px);
+      pointer-events: none;
       transition: opacity 0.2s;
     }
 
-    .magic-answer {
-      font-size: 11px; font-weight: 700; color: #a0c8ff;
-      text-align: center; padding: 6px 4px; line-height: 1.3;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      max-width: 58px;
-      opacity: 0;
-      transition: opacity 0.4s ease 0.15s;
-    }
-    .magic-answer.visible { opacity: 1; }
-
-    .ball-wrap.shaking .ball-outer {
-      animation: shake8 0.5s ease;
-    }
-    @keyframes shake8 {
-      0%   { transform: rotate(0deg); }
-      15%  { transform: rotate(-8deg) scale(1.04); }
-      30%  { transform: rotate(8deg) scale(1.04); }
-      45%  { transform: rotate(-6deg); }
-      60%  { transform: rotate(6deg); }
-      75%  { transform: rotate(-3deg); }
-      90%  { transform: rotate(3deg); }
-      100% { transform: rotate(0deg); }
-    }
-
     .magic-input-row {
-      display: flex; gap: 8px; width: 100%; margin-top: 16px;
+      display: flex; gap: 8px; width: 100%; margin-top: 10px;
     }
     .magic-input-row input {
       flex: 1; padding: 10px 12px; font-size: 14px; border-radius: 10px;
@@ -195,18 +224,53 @@
     .magic-input-row button:disabled { background: #7ab5e0; cursor: not-allowed; }
 
     .magic-hint {
-      font-size: 12px; color: #aaa; margin-top: 10px;
+      font-size: 12px; color: #aaa; margin-top: 8px;
     }
     body.dark .magic-hint { color: #555; }
 
     .magic-category {
       font-size: 11px; font-weight: 600; letter-spacing: 1px;
-      text-transform: uppercase; margin-top: 8px; min-height: 16px;
+      text-transform: uppercase; margin-top: 6px; min-height: 16px;
       transition: color 0.3s;
     }
     .cat-positive { color: #27ae60; }
     .cat-neutral  { color: #e67e22; }
     .cat-negative { color: #e74c3c; }
+
+    /* Shake toast notification */
+    .shake-toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1a1d27; color: #e8eaf0; padding: 10px 20px;
+      border-radius: 50px; font-size: 13px; font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      opacity: 0; transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none; white-space: nowrap; z-index: 999;
+    }
+    .shake-toast.show {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+
+    /* Shake permission button */
+    .shake-permission-btn {
+      margin-top: 10px; padding: 7px 16px; font-size: 12px; font-weight: 600;
+      border-radius: 50px; border: 1.5px solid #0078d4; cursor: pointer;
+      background: none; color: #0078d4; transition: background 0.2s, color 0.2s;
+      display: none;
+    }
+    .shake-permission-btn:hover { background: #0078d4; color: #fff; }
+    body.dark .shake-permission-btn { border-color: #2899f5; color: #2899f5; }
+    body.dark .shake-permission-btn:hover { background: #2899f5; color: #fff; }
+    .shake-permission-btn.visible { display: inline-block; }
+
+    /* Shake indicator ring on ball */
+    .ball-wrap.device-shake-active .ball-outer {
+      box-shadow:
+        0 8px 32px rgba(0,0,0,0.45),
+        0 2px 8px rgba(0,0,0,0.3),
+        inset 0 -6px 18px rgba(255,255,255,0.04),
+        inset 6px 6px 20px rgba(255,255,255,0.07),
+        0 0 0 3px #2899f5, 0 0 16px rgba(40,153,245,0.5);
+    }
   </style>
 </head>
 <body>
@@ -248,23 +312,33 @@
     <div class="tab-panel" id="panel-magic">
       <h2>🎱 Magic 8 Ball</h2>
 
-      <div class="ball-wrap" id="ball-wrap" onclick="shake8Ball()">
-        <div class="ball-outer">
-          <div class="ball-window">
-            <div class="magic-answer" id="magic-answer">8</div>
+      <div id="magic-arena">
+        <div id="ball-shadow"></div>
+        <div id="ball-el">
+          <div class="ball-window-inner">
+            <div class="magic-answer-inner" id="magic-answer">8</div>
           </div>
         </div>
+        <div id="magic-answer-overlay"></div>
       </div>
 
       <div class="magic-category" id="magic-category"></div>
 
       <div class="magic-input-row">
-        <input type="text" id="magic-question" placeholder="Ask your question…" onkeydown="if(event.key==='Enter') shake8Ball()">
-        <button id="magic-btn" onclick="shake8Ball()">Ask</button>
+        <input type="text" id="magic-question" placeholder="Ask your question…" onkeydown="if(event.key==='Enter') triggerAsk()">
+        <button id="magic-btn" onclick="triggerAsk()">Ask</button>
       </div>
-      <div class="magic-hint">Click the ball or press Ask to reveal your fate</div>
+
+      <button class="shake-permission-btn" id="shake-permission-btn" onclick="requestShakePermission()">
+        📳 Enable Device Shake
+      </button>
+
+      <div class="magic-hint" id="magic-hint">Drag & throw the ball — or shake your device</div>
     </div>
   </div>
+
+  <!-- Toast for shake feedback -->
+  <div class="shake-toast" id="shake-toast">📳 Shake detected!</div>
 
   <script>
     const ANSWERS = [
@@ -292,40 +366,321 @@
 
     const CAT_COLORS = { positive: "#27ae60", neutral: "#e67e22", negative: "#e74c3c" };
 
-    let shaking = false;
+    // ── Physics Ball ───────────────────────────────────────────────────────────
+    const BALL_R      = 60;
+    const SPRING_K    = 0.10;  // spring pull toward center
+    const SPRING_DAMP = 0.75;  // damping (lower = bouncier return)
+    const SETTLE_DIST = 0.5;   // px from center to snap
+    const SETTLE_SPD  = 0.4;
 
-    function shake8Ball() {
-      if (shaking) return;
-      shaking = true;
+    const arena   = document.getElementById("magic-arena");
+    const ballEl  = document.getElementById("ball-el");
+    const shadowEl= document.getElementById("ball-shadow");
 
-      const wrap = document.getElementById("ball-wrap");
-      const answerEl = document.getElementById("magic-answer");
-      const catEl = document.getElementById("magic-category");
-      const btn = document.getElementById("magic-btn");
+    let bx, by, vx = 0, vy = 0;
+    let dragging = false;
+    let dragOffX, dragOffY;
+    let prevDragX, prevDragY, prevDragT;
+    let rafId = null;
+    let answerRevealed = false;
+    let settleTimer = null;
+    let returning = false;
 
-      // Reset
-      answerEl.classList.remove("visible");
-      answerEl.textContent = "8";
-      catEl.textContent = "";
-      catEl.style.color = "";
-      btn.disabled = true;
-
-      wrap.classList.add("shaking");
-
-      setTimeout(() => {
-        wrap.classList.remove("shaking");
-
-        const pick = ANSWERS[Math.floor(Math.random() * ANSWERS.length)];
-        answerEl.textContent = pick.text;
-        answerEl.classList.add("visible");
-
-        catEl.textContent = pick.cat.toUpperCase();
-        catEl.style.color = CAT_COLORS[pick.cat];
-
-        btn.disabled = false;
-        shaking = false;
-      }, 550);
+    function arenaSize() {
+      return { w: arena.clientWidth, h: arena.clientHeight };
     }
+
+    function initBallPos() {
+      const { w, h } = arenaSize();
+      bx = w / 2;
+      by = h / 2;
+      vx = 0; vy = 0;
+      returning = false;
+      renderBall();
+    }
+
+    function renderBall() {
+      const { w, h } = arenaSize();
+      ballEl.style.left = (bx - BALL_R) + "px";
+      ballEl.style.top  = (by - BALL_R) + "px";
+
+      // Shadow shrinks the further the ball is from center
+      const cx = w / 2, cy = h / 2;
+      const dist = Math.hypot(bx - cx, by - cy);
+      const maxDist = Math.hypot(cx, cy);
+      const t = Math.min(dist / maxDist, 1);
+      const scale = 1 - t * 0.55;
+      const sw = BALL_R * 2 * scale;
+      const sh = BALL_R * 0.35 * scale;
+      shadowEl.style.width   = sw + "px";
+      shadowEl.style.height  = sh + "px";
+      shadowEl.style.left    = (bx - sw / 2) + "px";
+      shadowEl.style.top     = (by + BALL_R * 0.75 - sh / 2) + "px";
+      shadowEl.style.opacity = (0.15 + 0.28 * scale).toString();
+    }
+
+    function physicsStep() {
+      if (dragging) { renderBall(); rafId = requestAnimationFrame(physicsStep); return; }
+
+      const { w, h } = arenaSize();
+      const cx = w / 2, cy = h / 2;
+
+      // Spring toward center
+      vx = (vx + (cx - bx) * SPRING_K) * SPRING_DAMP;
+      vy = (vy + (cy - by) * SPRING_K) * SPRING_DAMP;
+      bx += vx;
+      by += vy;
+
+      renderBall();
+
+      const distToCenter = Math.hypot(bx - cx, by - cy);
+      const speed = Math.sqrt(vx * vx + vy * vy);
+
+      if (distToCenter < SETTLE_DIST && speed < SETTLE_SPD) {
+        bx = cx; by = cy; vx = 0; vy = 0;
+        renderBall();
+        rafId = null;
+        if (returning) {
+          returning = false;
+          revealAnswer();
+        }
+        return;
+      }
+
+      rafId = requestAnimationFrame(physicsStep);
+    }
+
+    function startPhysics() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(physicsStep);
+    }
+
+    function getEventPos(e) {
+      if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    function onPointerDown(e) {
+      e.preventDefault();
+      const rect = arena.getBoundingClientRect();
+      const { x, y } = getEventPos(e);
+      const lx = x - rect.left;
+      const ly = y - rect.top;
+      // Hit-test: only drag if within the ball
+      if (Math.hypot(lx - bx, ly - by) > BALL_R + 8) return;
+
+      dragging = true;
+      dragOffX = lx - bx;
+      dragOffY = ly - by;
+      prevDragX = lx; prevDragY = ly; prevDragT = Date.now();
+      vx = 0; vy = 0;
+
+      // Hide answer when picked up
+      hideAnswer();
+
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(physicsStep);
+      ballEl.style.transition = 'none';
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      const rect = arena.getBoundingClientRect();
+      const { x, y } = getEventPos(e);
+      const lx = x - rect.left;
+      const ly = y - rect.top;
+
+      const now = Date.now();
+      const dt  = Math.max(1, now - prevDragT);
+
+      // Velocity from drag (px/frame at 60fps)
+      vx = (lx - prevDragX) / dt * 16;
+      vy = (ly - prevDragY) / dt * 16;
+
+      prevDragX = lx; prevDragY = ly; prevDragT = now;
+
+      bx = lx - dragOffX;
+      by = ly - dragOffY;
+
+      // Clamp inside arena
+      const { w, h } = arenaSize();
+      bx = Math.max(BALL_R, Math.min(w - BALL_R, bx));
+      by = Math.max(BALL_R, Math.min(h - BALL_R, by));
+    }
+
+    function onPointerUp(e) {
+      if (!dragging) return;
+      dragging = false;
+
+      const { w, h } = arenaSize();
+      const cx = w / 2, cy = h / 2;
+      const distFromCenter = Math.hypot(bx - cx, by - cy);
+
+      // If dragged far enough from center, spring back and reveal answer on arrival
+      if (distFromCenter > BALL_R * 0.5) {
+        returning = true;
+        hideAnswer();
+      }
+
+      vx *= 0.3; vy *= 0.3; // kill throw momentum — we want smooth spring return
+      startPhysics();
+    }
+
+    // Mouse events
+    arena.addEventListener("mousedown",  onPointerDown);
+    window.addEventListener("mousemove", onPointerMove);
+    window.addEventListener("mouseup",   onPointerUp);
+
+    // Touch events
+    arena.addEventListener("touchstart", onPointerDown, { passive: false });
+    window.addEventListener("touchmove", onPointerMove, { passive: false });
+    window.addEventListener("touchend",  onPointerUp);
+
+    // Click on ball when not dragging → trigger answer
+    ballEl.addEventListener("click", () => {
+      if (Math.abs(vx) < 0.5 && Math.abs(vy) < 0.5) {
+        triggerAsk();
+      }
+    });
+
+    // Reveal / hide answer
+    function revealAnswer() {
+      if (answerRevealed) return;
+      answerRevealed = true;
+      const pick = ANSWERS[Math.floor(Math.random() * ANSWERS.length)];
+      document.getElementById("magic-answer").textContent  = pick.text;
+      document.getElementById("magic-answer").classList.add("visible");
+
+      const overlay = document.getElementById("magic-answer-overlay");
+      overlay.textContent = pick.text;
+      overlay.classList.add("visible");
+
+      const catEl = document.getElementById("magic-category");
+      catEl.textContent  = pick.cat.toUpperCase();
+      catEl.style.color  = CAT_COLORS[pick.cat];
+    }
+
+    function hideAnswer() {
+      answerRevealed = false;
+      document.getElementById("magic-answer").classList.remove("visible");
+      document.getElementById("magic-answer").textContent = "8";
+      document.getElementById("magic-answer-overlay").classList.remove("visible");
+      document.getElementById("magic-category").textContent = "";
+    }
+
+    // "Ask" button / click: fling ball out then spring back → reveal on return
+    function triggerAsk() {
+      hideAnswer();
+      returning = true;
+      vx = (Math.random() - 0.5) * 16;
+      vy = (Math.random() - 0.5) * 16;
+      startPhysics();
+    }
+
+    // ── Shake toast ────────────────────────────────────────────────────────────
+    let toastTimer = null;
+    function showShakeToast() {
+      const toast = document.getElementById("shake-toast");
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function shake8Ball(fromDevice) {
+      if (fromDevice) showShakeToast();
+      hideAnswer();
+      returning = true;
+      vx = (Math.random() - 0.5) * 20;
+      vy = (Math.random() - 0.5) * 20;
+      startPhysics();
+    }
+
+    // ── Device Motion Shake Detection ─────────────────────────────────────────
+    const SHAKE_THRESHOLD = 18;
+    const SHAKE_COOLDOWN  = 1200;
+    let lastShakeTime = 0;
+    let lastAcc = { x: null, y: null, z: null };
+
+    function handleMotion(e) {
+      const acc = e.accelerationIncludingGravity || e.acceleration;
+      if (!acc) return;
+      const { x, y, z } = acc;
+      if (lastAcc.x === null) { lastAcc = { x, y, z }; return; }
+      const delta = Math.abs(x - lastAcc.x) + Math.abs(y - lastAcc.y) + Math.abs(z - lastAcc.z);
+      lastAcc = { x, y, z };
+      const now = Date.now();
+      if (delta > SHAKE_THRESHOLD && now - lastShakeTime > SHAKE_COOLDOWN) {
+        lastShakeTime = now;
+        if (document.getElementById("panel-magic").classList.contains("active")) {
+          shake8Ball(true);
+        }
+      }
+    }
+
+    function startDeviceMotion() {
+      window.addEventListener("devicemotion", handleMotion, { passive: true });
+      document.getElementById("magic-hint").textContent = "Drag & release or shake your device — answer reveals on return";
+      document.getElementById("shake-permission-btn").classList.remove("visible");
+    }
+
+    function requestShakePermission() {
+      if (typeof DeviceMotionEvent !== "undefined" &&
+          typeof DeviceMotionEvent.requestPermission === "function") {
+        DeviceMotionEvent.requestPermission()
+          .then(state => { if (state === "granted") startDeviceMotion(); })
+          .catch(console.warn);
+      } else {
+        startDeviceMotion();
+      }
+    }
+
+    (function initShake() {
+      if (typeof DeviceMotionEvent === "undefined") {
+        document.getElementById("magic-hint").textContent = "Drag the ball and let go — it'll snap back with your answer";
+        return;
+      }
+      if (typeof DeviceMotionEvent.requestPermission === "function") {
+        document.getElementById("shake-permission-btn").classList.add("visible");
+        document.getElementById("magic-hint").textContent = "Enable shake, or drag & throw the ball";
+      } else {
+        startDeviceMotion();
+      }
+    })();
+
+    // ── Mouse shake detection (desktop) ───────────────────────────────────────
+    const MOUSE_REVERSAL_NEEDED = 4;
+    const MOUSE_WINDOW_MS       = 600;
+    const MOUSE_MIN_DELTA       = 30;
+    let mouseHistory = [];
+    let lastMouseDir = 0;
+    let reversals    = 0;
+
+    document.addEventListener("mousemove", (e) => {
+      if (!document.getElementById("panel-magic").classList.contains("active")) return;
+      if (dragging) return;
+      const now = Date.now();
+      mouseHistory.push({ x: e.clientX, t: now });
+      mouseHistory = mouseHistory.filter(p => now - p.t < MOUSE_WINDOW_MS);
+      if (mouseHistory.length < 2) return;
+      const prev = mouseHistory[mouseHistory.length - 2];
+      const curr = mouseHistory[mouseHistory.length - 1];
+      const dx   = curr.x - prev.x;
+      if (Math.abs(dx) < 4) return;
+      const dir = dx > 0 ? 1 : -1;
+      if (lastMouseDir !== 0 && dir !== lastMouseDir) reversals++;
+      lastMouseDir = dir;
+      const span = Math.max(...mouseHistory.map(p => p.x)) - Math.min(...mouseHistory.map(p => p.x));
+      if (reversals >= MOUSE_REVERSAL_NEEDED && span >= MOUSE_MIN_DELTA) {
+        const now2 = Date.now();
+        if (now2 - lastShakeTime > SHAKE_COOLDOWN) {
+          lastShakeTime = now2;
+          reversals = 0; mouseHistory = [];
+          shake8Ball(true);
+        }
+      }
+      if (mouseHistory.length <= 1) { reversals = 0; lastMouseDir = 0; }
+    });
 
     // ── Dark mode ──────────────────────────────────────────────────────────────
     const toggleBtn = document.getElementById("toggleBtn");
@@ -344,7 +699,17 @@
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
       el.classList.add("active");
       document.getElementById("panel-" + name).classList.add("active");
+      if (name === "magic") { requestAnimationFrame(() => { initBallPos(); startPhysics(); }); }
     }
+
+    // Init ball when page loads (arena may be hidden, use rAF after first render)
+    window.addEventListener("load", () => {
+      // Only init if magic tab is default visible — it's not, so we init on first switch
+      // But if someone directly opens the magic panel, handle it:
+      if (document.getElementById("panel-magic").classList.contains("active")) {
+        requestAnimationFrame(() => { initBallPos(); startPhysics(); });
+      }
+    });
 
     // ── Number Generator ───────────────────────────────────────────────────────
     function generate() {
