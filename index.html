@@ -642,45 +642,12 @@
       }
       if (typeof DeviceMotionEvent.requestPermission === "function") {
         document.getElementById("shake-permission-btn").classList.add("visible");
-        document.getElementById("magic-hint").textContent = "Enable shake, or drag & throw the ball";
+        document.getElementById("magic-hint").textContent = "Enable shake, or drag & release the ball";
       } else {
         startDeviceMotion();
       }
     })();
 
-    // ── Mouse shake detection (desktop) ───────────────────────────────────────
-    const MOUSE_REVERSAL_NEEDED = 4;
-    const MOUSE_WINDOW_MS       = 600;
-    const MOUSE_MIN_DELTA       = 30;
-    let mouseHistory = [];
-    let lastMouseDir = 0;
-    let reversals    = 0;
-
-    document.addEventListener("mousemove", (e) => {
-      if (!document.getElementById("panel-magic").classList.contains("active")) return;
-      if (dragging) return;
-      const now = Date.now();
-      mouseHistory.push({ x: e.clientX, t: now });
-      mouseHistory = mouseHistory.filter(p => now - p.t < MOUSE_WINDOW_MS);
-      if (mouseHistory.length < 2) return;
-      const prev = mouseHistory[mouseHistory.length - 2];
-      const curr = mouseHistory[mouseHistory.length - 1];
-      const dx   = curr.x - prev.x;
-      if (Math.abs(dx) < 4) return;
-      const dir = dx > 0 ? 1 : -1;
-      if (lastMouseDir !== 0 && dir !== lastMouseDir) reversals++;
-      lastMouseDir = dir;
-      const span = Math.max(...mouseHistory.map(p => p.x)) - Math.min(...mouseHistory.map(p => p.x));
-      if (reversals >= MOUSE_REVERSAL_NEEDED && span >= MOUSE_MIN_DELTA) {
-        const now2 = Date.now();
-        if (now2 - lastShakeTime > SHAKE_COOLDOWN) {
-          lastShakeTime = now2;
-          reversals = 0; mouseHistory = [];
-          shake8Ball(true);
-        }
-      }
-      if (mouseHistory.length <= 1) { reversals = 0; lastMouseDir = 0; }
-    });
 
     // ── Dark mode ──────────────────────────────────────────────────────────────
     const toggleBtn = document.getElementById("toggleBtn");
