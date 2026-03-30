@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BongTools</title>
+  <title>BongTools – BotC Storyteller Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { box-sizing: border-box; transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s; }
@@ -16,33 +16,32 @@
     }
     body.dark { background: #0f1117; color: #e8eaf0; }
     body.dark .box { background: #1a1d27; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-    body.dark input, body.dark textarea { background: #252836; border-color: #3a3f55; color: #e8eaf0; }
-    body.dark input:focus, body.dark textarea:focus { border-color: #2899f5; }
+    body.dark input, body.dark textarea, body.dark select { background: #252836; border-color: #3a3f55; color: #e8eaf0; }
+    body.dark input:focus, body.dark textarea:focus, body.dark select:focus { border-color: #2899f5; }
     body.dark input::placeholder, body.dark textarea::placeholder { color: #666e8a; }
+    body.dark .modal-content { background: #1a1d27; }
 
     .toggle-btn {
       position: fixed; top: 16px; right: 16px; background: none;
       border: 1.5px solid #d0d7e2; border-radius: 50px; padding: 6px 14px;
       cursor: pointer; font-size: 14px; font-weight: 600; color: #444;
-      display: flex; align-items: center; gap: 6px; width: auto;
+      display: flex; align-items: center; gap: 6px; width: auto; z-index: 1000;
     }
     .toggle-btn:hover { background: #e8eef8; }
     body.dark .toggle-btn { border-color: #3a3f55; color: #aab0c8; background: none; }
     body.dark .toggle-btn:hover { background: #252836; }
 
-    .coming-soon {
-      font-weight: 700; color: #fff;
-      background: linear-gradient(90deg, #0078d4, #2899f5);
-      padding: 10px 20px; border-radius: 12px; font-size: 18px;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.85; }
+    .storyteller-badge {
+      position: fixed; top: 16px; left: 16px; 
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: white; padding: 6px 14px; border-radius: 50px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+      z-index: 1000;
     }
 
     .box {
-      background: #fff; border-radius: 14px; width: 100%; max-width: 400px;
+      background: #fff; border-radius: 14px; width: 100%; max-width: 500px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; overflow: visible;
     }
 
@@ -62,14 +61,16 @@
     .tab-panel { display: none; padding: 24px; flex-direction: column; }
     .tab-panel.active { display: flex; }
 
-    h2 { margin-top: 0; margin-bottom: 20px; font-weight: 600; }
+    h2 { margin-top: 0; margin-bottom: 20px; font-weight: 600; font-size: 20px; }
+    h3 { margin: 16px 0 10px; font-weight: 600; font-size: 15px; color: #666; }
+    body.dark h3 { color: #aaa; }
 
     .inputs { display: flex; gap: 10px; margin-bottom: 16px; }
-    input[type="number"] {
+    input[type="number"], select {
       width: 100%; padding: 10px; font-size: 15px; border-radius: 10px;
       border: 1px solid #d0d7e2; outline: none; background: #fff; color: #111;
     }
-    input[type="number"]:focus { border-color: #0078d4; }
+    input[type="number"]:focus, select:focus { border-color: #0078d4; }
 
     button.action-btn {
       width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
@@ -79,9 +80,283 @@
     button.action-btn:hover { background: #106ebe; }
     button.action-btn:disabled { background: #7ab5e0; cursor: not-allowed; }
 
+    button.secondary-btn {
+      width: 100%; padding: 10px; font-size: 14px; font-weight: 600;
+      border-radius: 10px; border: 1.5px solid #0078d4; cursor: pointer;
+      background: none; color: #0078d4; transition: all 0.2s;
+    }
+    button.secondary-btn:hover { background: #0078d4; color: white; }
+    body.dark button.secondary-btn { border-color: #2899f5; color: #2899f5; }
+    body.dark button.secondary-btn:hover { background: #2899f5; color: white; }
+
     #result { margin-top: 18px; font-size: 32px; font-weight: 700; min-height: 40px; color: #0078d4; }
     body.dark #result { color: #2899f5; }
     .error { color: #d13438; font-size: 16px; }
+
+    /* Script Display */
+    .script-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white; padding: 16px; border-radius: 12px;
+      margin-bottom: 16px; text-align: left;
+    }
+    .script-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .script-author { font-size: 12px; opacity: 0.9; }
+
+    .character-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px; margin-bottom: 16px;
+    }
+
+    .character-card {
+      background: #f8f9fc; border: 2px solid #e4e8f0;
+      border-radius: 10px; padding: 10px; cursor: pointer;
+      transition: all 0.2s; text-align: center;
+    }
+    body.dark .character-card { background: #1f222e; border-color: #2a2e3d; }
+
+    .character-card:hover {
+      transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .character-card.selected {
+      border-color: #0078d4; background: #e8f4ff;
+    }
+    body.dark .character-card.selected { border-color: #2899f5; background: #1a2332; }
+
+    .character-card.bot-character {
+      border-color: #8b5cf6; background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+      border-width: 3px;
+    }
+    body.dark .character-card.bot-character {
+      background: linear-gradient(135deg, #2d1b4e, #1a1332);
+    }
+
+    .character-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      margin: 0 auto 8px; background: #e4e8f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    body.dark .character-icon { background: #2a2e3d; }
+
+    .character-card.bot-character .character-icon {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: white;
+    }
+
+    .character-name {
+      font-size: 13px; font-weight: 700; margin-bottom: 4px;
+      color: #111;
+    }
+    body.dark .character-name { color: #e8eaf0; }
+
+    .character-team {
+      font-size: 10px; text-transform: uppercase;
+      font-weight: 600; letter-spacing: 0.5px;
+      padding: 2px 6px; border-radius: 4px; display: inline-block;
+    }
+    .team-townsfolk { background: #3b82f6; color: white; }
+    .team-outsider { background: #06b6d4; color: white; }
+    .team-minion { background: #f59e0b; color: white; }
+    .team-demon { background: #ef4444; color: white; }
+    .team-traveller { background: #8b5cf6; color: white; }
+    .team-fabled { background: #6b7280; color: white; }
+
+    /* File Upload Area */
+    .upload-area {
+      border: 2px dashed #d0d7e2; border-radius: 12px;
+      padding: 30px 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; margin-bottom: 16px;
+      background: #f8f9fc;
+    }
+    body.dark .upload-area { background: #1f222e; border-color: #3a3f55; }
+
+    .upload-area:hover {
+      border-color: #0078d4; background: #e8f4ff;
+    }
+    body.dark .upload-area:hover { border-color: #2899f5; background: #1a2332; }
+
+    .upload-area.dragover {
+      border-color: #0078d4; background: #e8f4ff; transform: scale(1.02);
+    }
+
+    .upload-icon { font-size: 36px; margin-bottom: 10px; }
+    .upload-text { font-size: 14px; font-weight: 600; color: #666; }
+    body.dark .upload-text { color: #aaa; }
+    .upload-hint { font-size: 12px; color: #999; margin-top: 4px; }
+
+    /* Bot Action Panel */
+    .bot-action-panel {
+      background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+      border: 3px solid #8b5cf6; border-radius: 12px;
+      padding: 16px; margin-bottom: 16px;
+    }
+    body.dark .bot-action-panel {
+      background: linear-gradient(135deg, #2d1b4e, #1a1332);
+      border-color: #8b5cf6;
+    }
+
+    .bot-title {
+      font-size: 16px; font-weight: 700; color: #8b5cf6;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+    body.dark .bot-title { color: #a78bfa; }
+
+    .ability-text {
+      background: white; border-radius: 8px; padding: 12px;
+      font-size: 13px; line-height: 1.5; color: #444;
+      margin-bottom: 12px; text-align: left;
+      border: 1px solid #e4e8f0;
+    }
+    body.dark .ability-text { background: #252836; color: #aaa; border-color: #3a3f55; }
+
+    .action-result {
+      background: white; border-radius: 8px; padding: 16px;
+      margin-top: 12px; border: 2px solid #8b5cf6;
+      font-size: 18px; font-weight: 700; color: #8b5cf6;
+    }
+    body.dark .action-result { background: #252836; color: #a78bfa; }
+
+    /* Storyteller Panel */
+    .player-list {
+      display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;
+      max-height: 240px; overflow-y: auto; padding: 2px;
+    }
+
+    .player-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      background: #f8f9fc; border-radius: 10px; border: 1.5px solid #e4e8f0;
+    }
+    body.dark .player-item { background: #1f222e; border-color: #2a2e3d; }
+
+    .player-item.selected {
+      border-color: #0078d4; background: #e8f4ff;
+    }
+    body.dark .player-item.selected { border-color: #2899f5; background: #1a2332; }
+
+    .player-item input[type="checkbox"] {
+      width: 18px; height: 18px; cursor: pointer;
+    }
+
+    .player-name {
+      flex: 1; font-weight: 600; font-size: 14px; text-align: left;
+    }
+
+    .player-status {
+      display: flex; gap: 4px; flex-wrap: wrap;
+    }
+
+    .status-badge {
+      padding: 3px 8px; border-radius: 12px; font-size: 10px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+
+    .status-drunk { background: #fbbf24; color: #78350f; }
+    .status-poisoned { background: #a855f7; color: #fff; }
+    .status-dead { background: #6b7280; color: #fff; }
+
+    .add-player-row {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .add-player-row input {
+      flex: 1; padding: 10px; font-size: 14px; border-radius: 10px;
+      border: 1px solid #d0d7e2; outline: none;
+    }
+    .add-player-row button {
+      padding: 10px 16px; font-size: 14px; font-weight: 600;
+      border-radius: 10px; border: none; cursor: pointer;
+      background: #0078d4; color: white;
+    }
+
+    .preset-buttons {
+      display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .preset-btn {
+      padding: 8px 14px; font-size: 13px; font-weight: 600;
+      border-radius: 8px; border: 1.5px solid #d0d7e2; cursor: pointer;
+      background: #fff; color: #444; transition: all 0.2s;
+      flex: 1; min-width: 80px;
+    }
+    .preset-btn:hover { border-color: #0078d4; color: #0078d4; }
+    body.dark .preset-btn { background: #252836; border-color: #3a3f55; color: #aaa; }
+    body.dark .preset-btn:hover { border-color: #2899f5; color: #2899f5; }
+
+    .override-section {
+      background: #fef3c7; border: 1.5px solid #fbbf24; border-radius: 10px;
+      padding: 12px; margin-top: 16px;
+    }
+    body.dark .override-section { background: #2a2410; border-color: #78350f; }
+
+    .override-title {
+      font-weight: 700; font-size: 13px; color: #78350f;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+    body.dark .override-title { color: #fbbf24; }
+
+    .override-input {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .override-input input {
+      flex: 1; padding: 8px; font-size: 14px; border-radius: 8px;
+      border: 1px solid #fbbf24; background: #fff;
+    }
+    body.dark .override-input input { background: #1a1d27; border-color: #78350f; }
+
+    .override-input button {
+      padding: 8px 14px; font-size: 13px; font-weight: 600;
+      border-radius: 8px; border: none; cursor: pointer;
+      background: #fbbf24; color: #78350f;
+    }
+
+    .decision-log {
+      margin-top: 16px; padding: 12px; background: #f8f9fc;
+      border-radius: 10px; max-height: 150px; overflow-y: auto;
+      border: 1.5px solid #e4e8f0;
+    }
+    body.dark .decision-log { background: #1f222e; border-color: #2a2e3d; }
+
+    .log-entry {
+      font-size: 12px; padding: 6px 0; border-bottom: 1px solid #e4e8f0;
+      text-align: left; color: #666;
+    }
+    body.dark .log-entry { border-bottom-color: #2a2e3d; color: #aaa; }
+    .log-entry:last-child { border-bottom: none; }
+
+    .log-override { color: #f59e0b; font-weight: 600; }
+    body.dark .log-override { color: #fbbf24; }
+
+    .info-box {
+      background: #dbeafe; border: 1.5px solid #3b82f6;
+      border-radius: 10px; padding: 10px; margin-bottom: 16px;
+      font-size: 13px; color: #1e40af; text-align: left;
+    }
+    body.dark .info-box { background: #1e293b; border-color: #3b82f6; color: #93c5fd; }
+
+    /* Modal */
+    .modal {
+      display: none; position: fixed; z-index: 2000;
+      left: 0; top: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+    }
+    .modal.show { display: flex; }
+
+    .modal-content {
+      background: #fff; border-radius: 14px;
+      padding: 24px; max-width: 500px; width: 90%;
+      max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .modal-title {
+      font-size: 20px; font-weight: 700; margin-bottom: 16px;
+    }
+
+    .modal-close {
+      float: right; font-size: 24px; font-weight: 700;
+      color: #999; cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: #333; }
 
     /* Coin */
     .coin-scene { perspective: 600px; width: 100px; height: 100px; margin: 8px auto 0; }
@@ -112,55 +387,40 @@
     #panel-magic { align-items: center; padding: 16px 16px 20px; }
     #panel-magic h2 { margin-bottom: 6px; }
 
-    /* Physics arena */
     #magic-arena {
       width: 100%; aspect-ratio: 1 / 0.75;
-      border-radius: 12px;
-      background: #0a0a14;
+      border-radius: 12px; background: #0a0a14;
       position: relative; overflow: visible;
       cursor: grab; touch-action: none;
       border: 1.5px solid #1e2035;
-      margin-bottom: 4px;
-      margin-top: 8px;
+      margin-bottom: 4px; margin-top: 8px;
     }
     body.dark #magic-arena { background: #05050e; border-color: #1a1c2c; }
     #magic-arena:active { cursor: grabbing; }
 
-    /* Subtle grid floor */
     #magic-arena::before {
-      content: '';
-      position: absolute; inset: 0;
+      content: ''; position: absolute; inset: 0;
       background-image:
         linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 24px 24px;
-      pointer-events: none;
+      background-size: 24px 24px; pointer-events: none;
     }
 
     #ball-el {
-      position: absolute;
-      width: 120px; height: 120px;
-      border-radius: 50%;
+      position: absolute; width: 120px; height: 120px; border-radius: 50%;
       background: radial-gradient(circle at 35% 28%, #3d3d3d, #000 72%);
-      box-shadow:
-        0 8px 32px rgba(0,0,0,0.8),
-        inset 0 -4px 12px rgba(255,255,255,0.04),
+      box-shadow: 0 8px 32px rgba(0,0,0,0.8), inset 0 -4px 12px rgba(255,255,255,0.04),
         inset 5px 5px 16px rgba(255,255,255,0.06);
       display: flex; align-items: center; justify-content: center;
-      user-select: none; cursor: grab;
-      will-change: transform;
-      touch-action: none;
+      user-select: none; cursor: grab; will-change: transform; touch-action: none;
     }
     #ball-el:active { cursor: grabbing; }
 
-    /* Gloss */
     #ball-el::before {
-      content: '';
-      position: absolute; top: 12px; left: 20px;
+      content: ''; position: absolute; top: 12px; left: 20px;
       width: 36px; height: 20px; border-radius: 50%;
       background: radial-gradient(ellipse, rgba(255,255,255,0.18) 0%, transparent 70%);
-      transform: rotate(-20deg);
-      pointer-events: none;
+      transform: rotate(-20deg); pointer-events: none;
     }
 
     .ball-window-inner {
@@ -174,13 +434,10 @@
       font-size: 9px; font-weight: 700; color: #a0c8ff;
       text-align: center; padding: 3px; line-height: 1.2;
       text-transform: uppercase; letter-spacing: 0.3px;
-      max-width: 46px;
-      opacity: 0;
-      transition: opacity 0.5s ease 0.1s;
+      max-width: 46px; opacity: 0; transition: opacity 0.5s ease 0.1s;
     }
     .magic-answer-inner.visible { opacity: 1; }
 
-    /* Answer overlay above arena */
     #magic-answer-overlay {
       position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
       background: rgba(0,0,0,0.72); backdrop-filter: blur(6px);
@@ -192,14 +449,10 @@
     }
     #magic-answer-overlay.visible { opacity: 1; }
 
-    /* Shadow under ball */
     #ball-shadow {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.4);
-      filter: blur(6px);
-      pointer-events: none;
-      transition: opacity 0.2s;
+      position: absolute; border-radius: 50%;
+      background: rgba(0,0,0,0.4); filter: blur(6px);
+      pointer-events: none; transition: opacity 0.2s;
     }
 
     .magic-input-row {
@@ -208,91 +461,153 @@
     .magic-input-row input {
       flex: 1; padding: 10px 12px; font-size: 14px; border-radius: 10px;
       border: 1px solid #d0d7e2; outline: none; background: #fff; color: #111;
-      font-family: inherit;
-      transition: border-color 0.2s;
     }
-    .magic-input-row input:focus { border-color: #0078d4; }
-    body.dark .magic-input-row input { background: #252836; border-color: #3a3f55; color: #e8eaf0; }
-
     .magic-input-row button {
       padding: 10px 16px; font-size: 14px; font-weight: 600;
       border-radius: 10px; border: none; cursor: pointer;
       background: #0078d4; color: white; white-space: nowrap;
-      transition: background 0.2s; width: auto;
     }
-    .magic-input-row button:hover { background: #106ebe; }
-    .magic-input-row button:disabled { background: #7ab5e0; cursor: not-allowed; }
 
-    .magic-hint {
-      font-size: 12px; color: #aaa; margin-top: 8px;
-    }
+    .magic-hint { font-size: 12px; color: #aaa; margin-top: 8px; }
     body.dark .magic-hint { color: #555; }
 
     .magic-category {
       font-size: 11px; font-weight: 600; letter-spacing: 1px;
       text-transform: uppercase; margin-top: 6px; min-height: 16px;
-      transition: color 0.3s;
     }
     .cat-positive { color: #27ae60; }
     .cat-neutral  { color: #e67e22; }
     .cat-negative { color: #e74c3c; }
 
-    /* Shake toast notification */
-    .shake-toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-      background: #1a1d27; color: #e8eaf0; padding: 10px 20px;
-      border-radius: 50px; font-size: 13px; font-weight: 600;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      opacity: 0; transition: opacity 0.3s, transform 0.3s;
-      pointer-events: none; white-space: nowrap; z-index: 999;
-    }
-    .shake-toast.show {
-      opacity: 1; transform: translateX(-50%) translateY(0);
-    }
-
-    /* Shake permission button */
-    .shake-permission-btn {
-      margin-top: 10px; padding: 7px 16px; font-size: 12px; font-weight: 600;
-      border-radius: 50px; border: 1.5px solid #0078d4; cursor: pointer;
-      background: none; color: #0078d4; transition: background 0.2s, color 0.2s;
-      display: none;
-    }
-    .shake-permission-btn:hover { background: #0078d4; color: #fff; }
-    body.dark .shake-permission-btn { border-color: #2899f5; color: #2899f5; }
-    body.dark .shake-permission-btn:hover { background: #2899f5; color: #fff; }
-    .shake-permission-btn.visible { display: inline-block; }
-
-    /* Shake indicator ring on ball */
-    .ball-wrap.device-shake-active .ball-outer {
-      box-shadow:
-        0 8px 32px rgba(0,0,0,0.45),
-        0 2px 8px rgba(0,0,0,0.3),
-        inset 0 -6px 18px rgba(255,255,255,0.04),
-        inset 6px 6px 20px rgba(255,255,255,0.07),
-        0 0 0 3px #2899f5, 0 0 16px rgba(40,153,245,0.5);
-    }
+    input[type="file"] { display: none; }
   </style>
 </head>
 <body>
+  <div class="storyteller-badge">🎭 STORYTELLER MODE</div>
   <button class="toggle-btn" onclick="toggleDark()" id="toggleBtn">🌙 Dark</button>
-  <div class="coming-soon">BongTools V2 – Coming Soon 🚀</div>
 
   <div class="box">
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('number', this)">🔢 Number</button>
-      <button class="tab" onclick="switchTab('coin', this)">🪙 Coin Flip</button>
-      <button class="tab" onclick="switchTab('magic', this)">🎱 Magic 8</button>
+      <button class="tab active" onclick="switchTab('script', this)">📜 Script</button>
+      <button class="tab" onclick="switchTab('bot', this)">🤖 Bot</button>
+      <button class="tab" onclick="switchTab('storyteller', this)">🎭 Players</button>
+      <button class="tab" onclick="switchTab('number', this)">🔢 RNG</button>
+      <button class="tab" onclick="switchTab('coin', this)">🪙 Coin</button>
+      <button class="tab" onclick="switchTab('magic', this)">🎱 Magic</button>
+    </div>
+
+    <!-- Script Import Panel -->
+    <div class="tab-panel active" id="panel-script">
+      <h2>Load Script</h2>
+      
+      <div class="info-box">
+        <strong>Import your BotC script:</strong> Upload a JSON or XML file from the Script Tool or use a built-in script.
+      </div>
+
+      <input type="file" id="file-input" accept=".json,.xml" onchange="handleFileUpload(event)">
+      <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📜</div>
+        <div class="upload-text">Click or drop script file</div>
+        <div class="upload-hint">Supports JSON & XML from clocktower.online</div>
+      </div>
+
+      <div class="preset-buttons">
+        <button class="preset-btn" onclick="loadBuiltInScript('tb')">Trouble Brewing</button>
+        <button class="preset-btn" onclick="loadBuiltInScript('bmr')">Bad Moon Rising</button>
+        <button class="preset-btn" onclick="loadBuiltInScript('snv')">Sects & Violets</button>
+      </div>
+
+      <div id="script-display"></div>
+    </div>
+
+    <!-- Bot Character Panel -->
+    <div class="tab-panel" id="panel-bot">
+      <h2>Bot Player</h2>
+      
+      <div id="no-script-message" class="info-box">
+        <strong>No script loaded:</strong> Please load a script first to select the bot's character.
+      </div>
+
+      <div id="bot-character-select" style="display: none;">
+        <h3>Select Bot Character</h3>
+        <div id="bot-character-grid" class="character-grid"></div>
+      </div>
+
+      <div id="bot-action-display" style="display: none;">
+        <div class="bot-action-panel">
+          <div class="bot-title">
+            <span>🤖</span>
+            <span id="bot-char-name"></span>
+          </div>
+          <div class="ability-text" id="bot-ability"></div>
+          <button class="action-btn" onclick="checkBotAction()">Check Night Action</button>
+          <div class="action-result" id="bot-action-result" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Storyteller Panel -->
+    <div class="tab-panel" id="panel-storyteller">
+      <h2>Storyteller Controls</h2>
+      
+      <div class="info-box">
+        <strong>Bot Player Mode:</strong> Manage game state and make fair decisions for the bot player. All actions are logged for transparency.
+      </div>
+
+      <h3>Players in Game</h3>
+      <div class="add-player-row">
+        <input type="text" id="new-player-name" placeholder="Player name..." onkeydown="if(event.key==='Enter') addPlayer()">
+        <button onclick="addPlayer()">Add</button>
+      </div>
+
+      <div class="player-list" id="player-list"></div>
+
+      <h3>Quick Actions</h3>
+      <div class="preset-buttons">
+        <button class="preset-btn" onclick="markSelectedAs('drunk')">🍺 Drunk</button>
+        <button class="preset-btn" onclick="markSelectedAs('poisoned')">☠️ Poison</button>
+        <button class="preset-btn" onclick="markSelectedAs('dead')">💀 Dead</button>
+        <button class="preset-btn" onclick="clearSelectedStatus()">✨ Clear</button>
+      </div>
+
+      <h3>Decision Log</h3>
+      <div class="decision-log" id="decision-log">
+        <div class="log-entry" style="color: #999; font-style: italic;">No decisions yet...</div>
+      </div>
+
+      <button class="secondary-btn" onclick="clearLog()" style="margin-top: 12px;">Clear Log</button>
     </div>
 
     <!-- Number Generator -->
-    <div class="tab-panel active" id="panel-number">
+    <div class="tab-panel" id="panel-number">
       <h2>Number Generator</h2>
-      <div class="inputs">
-        <input id="min" type="number" placeholder="Minimum">
-        <input id="max" type="number" placeholder="Maximum">
+      
+      <div class="preset-buttons">
+        <button class="preset-btn" onclick="setRange(1, 3)">1-3</button>
+        <button class="preset-btn" onclick="setRange(1, 5)">1-5</button>
+        <button class="preset-btn" onclick="setRange(1, 10)">1-10</button>
+        <button class="preset-btn" onclick="setRange(1, 20)">1-20</button>
       </div>
+
+      <div class="inputs">
+        <input id="min" type="number" placeholder="Minimum" value="1">
+        <input id="max" type="number" placeholder="Maximum" value="10">
+      </div>
+
       <button class="action-btn" onclick="generate()">Generate</button>
       <div id="result">—</div>
+
+      <div class="override-section">
+        <div class="override-title">⚠️ Storyteller Override</div>
+        <div class="override-input">
+          <input type="number" id="override-value" placeholder="Force result...">
+          <button onclick="overrideResult()">Set</button>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top: 16px; font-size: 12px;">
+        <strong>Game Contexts:</strong> 1-3 (Fortune Teller pings), 1-5 (Washerwoman/Librarian), 1-10 (Slayer shots), 1-20 (general choices)
+      </div>
     </div>
 
     <!-- Coin Flip -->
@@ -306,6 +621,14 @@
       </div>
       <div id="coin-label">—</div>
       <button class="action-btn" id="flip-btn" onclick="flipCoin()">Flip Coin</button>
+
+      <div class="override-section" style="margin-top: 20px;">
+        <div class="override-title">⚠️ Force Result</div>
+        <div class="preset-buttons">
+          <button class="preset-btn" onclick="forceCoinResult('heads')">Heads</button>
+          <button class="preset-btn" onclick="forceCoinResult('tails')">Tails</button>
+        </div>
+      </div>
     </div>
 
     <!-- Magic 8 Ball -->
@@ -329,72 +652,669 @@
         <button id="magic-btn" onclick="triggerAsk()">Ask</button>
       </div>
 
-      <button class="shake-permission-btn" id="shake-permission-btn" onclick="requestShakePermission()">
-        📳 Enable Device Shake
-      </button>
-
-      <div class="magic-hint" id="magic-hint">Drag & throw the ball — or shake your device</div>
+      <div class="magic-hint" id="magic-hint">Drag & throw the ball</div>
     </div>
   </div>
 
-  <!-- Toast for shake feedback -->
-  <div class="shake-toast" id="shake-toast">📳 Shake detected!</div>
+  <!-- Character Detail Modal -->
+  <div class="modal" id="character-modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <h2 class="modal-title" id="modal-char-name"></h2>
+      <div id="modal-char-details"></div>
+    </div>
+  </div>
 
   <script>
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GAME STATE MANAGEMENT
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    let players = [];
+    let decisionLog = [];
+    let currentScript = null;
+    let botCharacter = null;
+
+    // Built-in scripts (simplified versions)
+    const BUILT_IN_SCRIPTS = {
+      tb: {
+        name: "Trouble Brewing",
+        author: "The Pandemonium Institute",
+        characters: [
+          { id: "washerwoman", name: "Washerwoman", team: "townsfolk", ability: "You start knowing that 1 of 2 players is a particular Townsfolk.", firstNight: 37, otherNights: 0 },
+          { id: "librarian", name: "Librarian", team: "townsfolk", ability: "You start knowing that 1 of 2 players is a particular Outsider. (Or that zero are in play.)", firstNight: 38, otherNights: 0 },
+          { id: "investigator", name: "Investigator", team: "townsfolk", ability: "You start knowing that 1 of 2 players is a particular Minion.", firstNight: 39, otherNights: 0 },
+          { id: "chef", name: "Chef", team: "townsfolk", ability: "You start knowing how many pairs of evil players there are.", firstNight: 40, otherNights: 0 },
+          { id: "empath", name: "Empath", team: "townsfolk", ability: "Each night, you learn how many of your 2 alive neighbours are evil.", firstNight: 41, otherNights: 58 },
+          { id: "fortuneteller", name: "Fortune Teller", team: "townsfolk", ability: "Each night, choose 2 players: you learn if either is a Demon. There is a good player that registers as a Demon to you.", firstNight: 42, otherNights: 59 },
+          { id: "undertaker", name: "Undertaker", team: "townsfolk", ability: "Each night*, you learn which character died by execution today.", firstNight: 0, otherNights: 60 },
+          { id: "monk", name: "Monk", team: "townsfolk", ability: "Each night*, choose a player (not yourself): they are safe from the Demon tonight.", firstNight: 0, otherNights: 12 },
+          { id: "ravenkeeper", name: "Ravenkeeper", team: "townsfolk", ability: "If you die at night, you are woken to choose a player: you learn their character.", firstNight: 0, otherNights: 50 },
+          { id: "virgin", name: "Virgin", team: "townsfolk", ability: "The 1st time you are nominated, if the nominator is a Townsfolk, they are executed immediately.", firstNight: 0, otherNights: 0 },
+          { id: "slayer", name: "Slayer", team: "townsfolk", ability: "Once per game, during the day, publicly choose a player: if they are the Demon, they die.", firstNight: 0, otherNights: 0 },
+          { id: "soldier", name: "Soldier", team: "townsfolk", ability: "You are safe from the Demon.", firstNight: 0, otherNights: 0 },
+          { id: "mayor", name: "Mayor", team: "townsfolk", ability: "If only 3 players live & no execution occurs, your team wins. If you die at night, another player might die instead.", firstNight: 0, otherNights: 0 },
+          { id: "butler", name: "Butler", team: "outsider", ability: "Each night, choose a player (not yourself): tomorrow, you may only vote if they are voting too.", firstNight: 43, otherNights: 61 },
+          { id: "drunk", name: "Drunk", team: "outsider", ability: "You do not know you are the Drunk. You think you are a Townsfolk character, but you are not.", firstNight: 0, otherNights: 0 },
+          { id: "recluse", name: "Recluse", team: "outsider", ability: "You might register as evil & as a Minion or Demon, even if dead.", firstNight: 0, otherNights: 0 },
+          { id: "saint", name: "Saint", team: "outsider", ability: "If you die by execution, your team loses.", firstNight: 0, otherNights: 0 },
+          { id: "poisoner", name: "Poisoner", team: "minion", ability: "Each night, choose a player: they are poisoned tonight and tomorrow day.", firstNight: 17, otherNights: 8 },
+          { id: "spy", name: "Spy", team: "minion", ability: "Each night, you see the Grimoire. You might register as good & as a Townsfolk or Outsider, even if dead.", firstNight: 49, otherNights: 67 },
+          { id: "scarletwoman", name: "Scarlet Woman", team: "minion", ability: "If there are 5 or more players alive & the Demon dies, you become the Demon.", firstNight: 18, otherNights: 20 },
+          { id: "baron", name: "Baron", team: "minion", ability: "There are extra Outsiders in play. [+2 Outsiders]", firstNight: 0, otherNights: 0 },
+          { id: "imp", name: "Imp", team: "demon", ability: "Each night*, choose a player: they die. If you kill yourself this way, a Minion becomes the Imp.", firstNight: 0, otherNights: 24 }
+        ]
+      },
+      bmr: {
+        name: "Bad Moon Rising",
+        author: "The Pandemonium Institute",
+        characters: [
+          { id: "grandmother", name: "Grandmother", team: "townsfolk", ability: "You start knowing a good player & their character. If the Demon kills them, you die too.", firstNight: 38, otherNights: 0 },
+          { id: "sailor", name: "Sailor", team: "townsfolk", ability: "Each night, choose an alive player: either you or they are drunk until dusk. You can't die.", firstNight: 11, otherNights: 4 },
+          { id: "chambermaid", name: "Chambermaid", team: "townsfolk", ability: "Each night, choose 2 alive players (not yourself): you learn how many woke tonight due to their ability.", firstNight: 50, otherNights: 68 },
+          { id: "exorcist", name: "Exorcist", team: "townsfolk", ability: "Each night*, choose a player (different to previous night): the Demon, if chosen, learns who you are then doesn't wake tonight.", firstNight: 0, otherNights: 22 },
+          { id: "innkeeper", name: "Innkeeper", team: "townsfolk", ability: "Each night*, choose 2 players: they can't die tonight, but 1 is drunk until dusk.", firstNight: 0, otherNights: 10 },
+          { id: "gambler", name: "Gambler", team: "townsfolk", ability: "Each night*, choose a player & guess their character: if you guess wrong, you die.", firstNight: 0, otherNights: 13 },
+          { id: "gossip", name: "Gossip", team: "townsfolk", ability: "Each day, you may make a public statement. Tonight, if it was true, a player dies.", firstNight: 0, otherNights: 41 },
+          { id: "courtier", name: "Courtier", team: "townsfolk", ability: "Once per game, at night, choose a character: they are drunk for 3 nights & 3 days.", firstNight: 19, otherNights: 9 },
+          { id: "professor", name: "Professor", team: "townsfolk", ability: "Once per game, at night*, choose a dead player: if they are a Townsfolk, they are resurrected.", firstNight: 0, otherNights: 42 },
+          { id: "minstrel", name: "Minstrel", team: "townsfolk", ability: "When a Minion dies by execution, all other players (except Travellers) are drunk until dusk tomorrow.", firstNight: 0, otherNights: 0 },
+          { id: "tealady", name: "Tea Lady", team: "townsfolk", ability: "If both your alive neighbours are good, they can't die.", firstNight: 0, otherNights: 0 },
+          { id: "pacifist", name: "Pacifist", team: "townsfolk", ability: "Executed good players might not die.", firstNight: 0, otherNights: 0 },
+          { id: "fool", name: "Fool", team: "townsfolk", ability: "The first time you die, you don't.", firstNight: 0, otherNights: 0 },
+          { id: "tinker", name: "Tinker", team: "outsider", ability: "You might die at any time.", firstNight: 0, otherNights: 50 },
+          { id: "moonchild", name: "Moonchild", team: "outsider", ability: "When you learn that you died, publicly choose 1 alive player. Tonight, if it was a good player, they die.", firstNight: 0, otherNights: 51 },
+          { id: "goon", name: "Goon", team: "outsider", ability: "Each night, the 1st player to choose you with their ability is drunk until dusk. You become their alignment.", firstNight: 0, otherNights: 0 },
+          { id: "lunatic", name: "Lunatic", team: "outsider", ability: "You think you are a Demon, but you are not. The Demon knows who you are & who you choose at night.", firstNight: 19, otherNights: 0 },
+          { id: "godfather", name: "Godfather", team: "minion", ability: "You start knowing which Outsiders are in play. If 1 died today, choose a player tonight: they die. [-1 or +1 Outsider]", firstNight: 20, otherNights: 39 },
+          { id: "devilsadvocate", name: "Devil's Advocate", team: "minion", ability: "Each night, choose a living player (different to previous night): if executed tomorrow, they don't die.", firstNight: 21, otherNights: 14 },
+          { id: "assassin", name: "Assassin", team: "minion", ability: "Once per game, at night*, choose a player: they die, even if for some reason they could not.", firstNight: 0, otherNights: 31 },
+          { id: "mastermind", name: "Mastermind", team: "minion", ability: "If the Demon dies by execution (ending the game), play for 1 more day. If a player is then executed, their team loses.", firstNight: 0, otherNights: 0 },
+          { id: "zombuul", name: "Zombuul", team: "demon", ability: "Each night*, if no-one died today, choose a player: they die. The 1st time you die, you live but register as dead.", firstNight: 0, otherNights: 25 },
+          { id: "pukka", name: "Pukka", team: "demon", ability: "Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.", firstNight: 29, otherNights: 26 },
+          { id: "shabaloth", name: "Shabaloth", team: "demon", ability: "Each night*, choose 2 players: they die. A dead player you chose last night might be regurgitated.", firstNight: 0, otherNights: 27 },
+          { id: "po", name: "Po", team: "demon", ability: "Each night*, you may choose a player: they die. If your last choice was no-one, choose 3 players tonight.", firstNight: 0, otherNights: 28 }
+        ]
+      },
+      snv: {
+        name: "Sects & Violets",
+        author: "The Pandemonium Institute",
+        characters: [
+          { id: "clockmaker", name: "Clockmaker", team: "townsfolk", ability: "You start knowing how many steps from the Demon to its nearest Minion.", firstNight: 36, otherNights: 0 },
+          { id: "dreamer", name: "Dreamer", team: "townsfolk", ability: "Each night, choose a player (not yourself or Travellers): you learn 1 good & 1 evil character, 1 of which is correct.", firstNight: 38, otherNights: 56 },
+          { id: "snakecharmer", name: "Snake Charmer", team: "townsfolk", ability: "Each night, choose an alive player: a chosen Demon swaps characters & alignments with you & is then poisoned.", firstNight: 18, otherNights: 15 },
+          { id: "mathematician", name: "Mathematician", team: "townsfolk", ability: "Each night, you learn how many players' abilities worked abnormally (since dawn) due to another character's ability.", firstNight: 50, otherNights: 68 },
+          { id: "flowergirl", name: "Flowergirl", team: "townsfolk", ability: "Each night*, you learn if a Demon voted today.", firstNight: 0, otherNights: 57 },
+          { id: "towncrier", name: "Town Crier", team: "townsfolk", ability: "Each night*, you learn if a Minion nominated today.", firstNight: 0, otherNights: 58 },
+          { id: "oracle", name: "Oracle", team: "townsfolk", ability: "Each night*, you learn how many dead players are evil.", firstNight: 0, otherNights: 59 },
+          { id: "savant", name: "Savant", team: "townsfolk", ability: "Each day, you may visit the Storyteller to learn 2 things in private: 1 is true & 1 is false.", firstNight: 0, otherNights: 0 },
+          { id: "seamstress", name: "Seamstress", team: "townsfolk", ability: "Once per game, at night, choose 2 players (not yourself): you learn if they are the same alignment.", firstNight: 39, otherNights: 60 },
+          { id: "philosopher", name: "Philosopher", team: "townsfolk", ability: "Once per game, at night, choose a good character: gain that ability. If this character is in play, they are drunk.", firstNight: 2, otherNights: 2 },
+          { id: "artist", name: "Artist", team: "townsfolk", ability: "Once per game, during the day, privately ask the Storyteller any yes/no question.", firstNight: 0, otherNights: 0 },
+          { id: "juggler", name: "Juggler", team: "townsfolk", ability: "On your 1st day, publicly guess up to 5 players' characters. That night, you learn how many you got correct.", firstNight: 0, otherNights: 61 },
+          { id: "sage", name: "Sage", team: "townsfolk", ability: "If the Demon kills you, you learn that it is 1 of 2 players.", firstNight: 0, otherNights: 48 },
+          { id: "mutant", name: "Mutant", team: "outsider", ability: "If you are 'mad' about being an Outsider, you might be executed.", firstNight: 0, otherNights: 0 },
+          { id: "sweetheart", name: "Sweetheart", team: "outsider", ability: "When you die, 1 player is drunk from now on.", firstNight: 0, otherNights: 0 },
+          { id: "barber", name: "Barber", team: "outsider", ability: "If you died today or tonight, the Demon may choose 2 players (not another Demon) to swap characters.", firstNight: 0, otherNights: 43 },
+          { id: "klutz", name: "Klutz", team: "outsider", ability: "When you learn that you died, publicly choose 1 alive player: if they are evil, your team loses.", firstNight: 0, otherNights: 0 },
+          { id: "eviltwin", name: "Evil Twin", team: "minion", ability: "You & an opposing player know each other. If the good player is executed, evil wins. Good can't win if you both live.", firstNight: 27, otherNights: 0 },
+          { id: "witch", name: "Witch", team: "minion", ability: "Each night, choose a player: if they nominate tomorrow, they die. If just 3 players live, you lose this ability.", firstNight: 23, otherNights: 13 },
+          { id: "cerenovus", name: "Cerenovus", team: "minion", ability: "Each night, choose a player & a good character: they are 'mad' they are this character tomorrow, or might be executed.", firstNight: 24, otherNights: 14 },
+          { id: "pithag", name: "Pit-Hag", team: "minion", ability: "Each night*, choose a player & a character they become (if not-in-play). If a Demon is made, deaths tonight are arbitrary.", firstNight: 0, otherNights: 16 },
+          { id: "fanggu", name: "Fang Gu", team: "demon", ability: "Each night*, choose a player: they die. The 1st Outsider this kills becomes an evil Fang Gu & you die instead. [+1 Outsider]", firstNight: 0, otherNights: 30 },
+          { id: "vigormortis", name: "Vigormortis", team: "demon", ability: "Each night*, choose a player: they die. Minions you kill keep their ability & poison 1 Townsfolk neighbour. [-1 Outsider]", firstNight: 0, otherNights: 31 },
+          { id: "nodashii", name: "No Dashii", team: "demon", ability: "Each night*, choose a player: they die. Your 2 Townsfolk neighbours are poisoned.", firstNight: 0, otherNights: 32 },
+          { id: "vortox", name: "Vortox", team: "demon", ability: "Each night*, choose a player: they die. Townsfolk abilities yield false info. Each day, if no-one is executed, evil wins.", firstNight: 0, otherNights: 33 }
+        ]
+      }
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem('bongtools-state');
+      if (saved) {
+        const state = JSON.parse(saved);
+        players = state.players || [];
+        decisionLog = state.log || [];
+        currentScript = state.script || null;
+        botCharacter = state.botCharacter || null;
+        renderPlayers();
+        renderLog();
+        if (currentScript) {
+          renderScript();
+          renderBotCharacterSelect();
+          if (botCharacter) renderBotAction();
+        }
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem('bongtools-state', JSON.stringify({
+        players: players,
+        log: decisionLog,
+        script: currentScript,
+        botCharacter: botCharacter
+      }));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SCRIPT LOADING
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const content = e.target.result;
+          if (file.name.endsWith('.json')) {
+            parseJSONScript(content);
+          } else if (file.name.endsWith('.xml')) {
+            parseXMLScript(content);
+          }
+        } catch (err) {
+          alert('Error parsing file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function parseJSONScript(content) {
+      const data = JSON.parse(content);
+      
+      // Handle clocktower.online JSON format
+      currentScript = {
+        name: data.name || data.id || "Custom Script",
+        author: data.author || "Unknown",
+        characters: data.map(char => ({
+          id: char.id,
+          name: char.name || char.id,
+          team: char.team,
+          ability: char.ability || "",
+          firstNight: char.firstNight || 0,
+          otherNights: char.otherNights || 0
+        }))
+      };
+
+      renderScript();
+      renderBotCharacterSelect();
+      saveState();
+      logDecision(`Loaded script: ${currentScript.name}`);
+    }
+
+    function parseXMLScript(content) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(content, "text/xml");
+      
+      const scriptName = doc.querySelector('script')?.getAttribute('name') || "Custom Script";
+      const author = doc.querySelector('script')?.getAttribute('author') || "Unknown";
+      
+      const characters = [];
+      doc.querySelectorAll('character').forEach(char => {
+        characters.push({
+          id: char.getAttribute('id'),
+          name: char.getAttribute('name') || char.getAttribute('id'),
+          team: char.querySelector('team')?.textContent || 'townsfolk',
+          ability: char.querySelector('ability')?.textContent || '',
+          firstNight: parseInt(char.querySelector('firstNight')?.textContent) || 0,
+          otherNights: parseInt(char.querySelector('otherNights')?.textContent) || 0
+        });
+      });
+
+      currentScript = { name: scriptName, author: author, characters: characters };
+      
+      renderScript();
+      renderBotCharacterSelect();
+      saveState();
+      logDecision(`Loaded script: ${currentScript.name}`);
+    }
+
+    function loadBuiltInScript(scriptId) {
+      currentScript = BUILT_IN_SCRIPTS[scriptId];
+      renderScript();
+      renderBotCharacterSelect();
+      saveState();
+      logDecision(`Loaded script: ${currentScript.name}`);
+    }
+
+    function renderScript() {
+      const display = document.getElementById('script-display');
+      if (!currentScript) {
+        display.innerHTML = '';
+        return;
+      }
+
+      const byTeam = {
+        townsfolk: [],
+        outsider: [],
+        minion: [],
+        demon: [],
+        traveller: [],
+        fabled: []
+      };
+
+      currentScript.characters.forEach(char => {
+        if (byTeam[char.team]) byTeam[char.team].push(char);
+      });
+
+      let html = `
+        <div class="script-header">
+          <div class="script-name">${currentScript.name}</div>
+          <div class="script-author">by ${currentScript.author}</div>
+        </div>
+      `;
+
+      for (const [team, chars] of Object.entries(byTeam)) {
+        if (chars.length === 0) continue;
+        html += `<h3>${team.charAt(0).toUpperCase() + team.slice(1)} (${chars.length})</h3>`;
+        html += `<div class="character-grid">`;
+        chars.forEach(char => {
+          html += `
+            <div class="character-card" onclick="selectScriptCharacter('${char.id}')">
+              <div class="character-icon">${getCharacterEmoji(char.team)}</div>
+              <div class="character-name">${char.name}</div>
+              <div class="character-team team-${char.team}">${team}</div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      display.innerHTML = html;
+    }
+
+    function getCharacterEmoji(team) {
+      const emojis = {
+        townsfolk: '👤',
+        outsider: '🔵',
+        minion: '🔴',
+        demon: '😈',
+        traveller: '🎒',
+        fabled: '⭐'
+      };
+      return emojis[team] || '❓';
+    }
+
+    function selectScriptCharacter(charId) {
+      if (!currentScript) return;
+      const char = currentScript.characters.find(c => c.id === charId);
+      if (!char) return;
+
+      // Show modal with character details
+      document.getElementById('modal-char-name').textContent = char.name;
+      document.getElementById('modal-char-details').innerHTML = `
+        <p><strong>Team:</strong> ${char.team}</p>
+        <p><strong>Ability:</strong> ${char.ability}</p>
+        <p><strong>First Night:</strong> ${char.firstNight || 'None'}</p>
+        <p><strong>Other Nights:</strong> ${char.otherNights || 'None'}</p>
+      `;
+      document.getElementById('character-modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('character-modal').classList.remove('show');
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BOT CHARACTER MANAGEMENT
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    function renderBotCharacterSelect() {
+      if (!currentScript) {
+        document.getElementById('no-script-message').style.display = 'block';
+        document.getElementById('bot-character-select').style.display = 'none';
+        document.getElementById('bot-action-display').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('no-script-message').style.display = 'none';
+      document.getElementById('bot-character-select').style.display = 'block';
+
+      const grid = document.getElementById('bot-character-grid');
+      grid.innerHTML = currentScript.characters.map(char => `
+        <div class="character-card ${botCharacter?.id === char.id ? 'bot-character' : ''}" 
+             onclick="selectBotCharacter('${char.id}')">
+          <div class="character-icon">${getCharacterEmoji(char.team)}</div>
+          <div class="character-name">${char.name}</div>
+          <div class="character-team team-${char.team}">${char.team}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectBotCharacter(charId) {
+      if (!currentScript) return;
+      botCharacter = currentScript.characters.find(c => c.id === charId);
+      renderBotCharacterSelect();
+      renderBotAction();
+      saveState();
+      logDecision(`Set bot character: ${botCharacter.name}`);
+    }
+
+    function renderBotAction() {
+      if (!botCharacter) {
+        document.getElementById('bot-action-display').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('bot-action-display').style.display = 'block';
+      document.getElementById('bot-char-name').textContent = botCharacter.name;
+      document.getElementById('bot-ability').textContent = botCharacter.ability;
+      document.getElementById('bot-action-result').style.display = 'none';
+    }
+
+    function checkBotAction() {
+      if (!botCharacter) return;
+
+      const hasFirstNight = botCharacter.firstNight > 0;
+      const hasOtherNights = botCharacter.otherNights > 0;
+
+      let result = '';
+      
+      if (!hasFirstNight && !hasOtherNights) {
+        result = '⚪ No Night Action';
+      } else {
+        // Simple yes/no for whether they act
+        const acts = Math.random() < 0.5;
+        if (acts) {
+          result = '✅ Bot Acts Tonight';
+        } else {
+          result = '❌ Bot Doesn\'t Act';
+        }
+      }
+
+      const resultEl = document.getElementById('bot-action-result');
+      resultEl.textContent = result;
+      resultEl.style.display = 'block';
+
+      logDecision(`Bot action check (${botCharacter.name}): ${result}`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PLAYER MANAGEMENT
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    function addPlayer() {
+      const input = document.getElementById('new-player-name');
+      const name = input.value.trim();
+      if (!name) return;
+      
+      players.push({
+        id: Date.now(),
+        name: name,
+        drunk: false,
+        poisoned: false,
+        dead: false,
+        selected: false
+      });
+      
+      input.value = '';
+      renderPlayers();
+      saveState();
+      logDecision(`Added player: ${name}`);
+    }
+
+    function removePlayer(id) {
+      const player = players.find(p => p.id === id);
+      players = players.filter(p => p.id !== id);
+      renderPlayers();
+      saveState();
+      if (player) logDecision(`Removed player: ${player.name}`);
+    }
+
+    function togglePlayerSelection(id) {
+      const player = players.find(p => p.id === id);
+      if (player) {
+        player.selected = !player.selected;
+        renderPlayers();
+      }
+    }
+
+    function markSelectedAs(status) {
+      const selected = players.filter(p => p.selected);
+      if (selected.length === 0) {
+        alert('Select players first');
+        return;
+      }
+
+      selected.forEach(p => {
+        p[status] = true;
+        logDecision(`Marked ${p.name} as ${status}`);
+      });
+
+      renderPlayers();
+      saveState();
+    }
+
+    function clearSelectedStatus() {
+      const selected = players.filter(p => p.selected);
+      if (selected.length === 0) {
+        alert('Select players first');
+        return;
+      }
+
+      selected.forEach(p => {
+        p.drunk = false;
+        p.poisoned = false;
+        p.dead = false;
+        logDecision(`Cleared status for ${p.name}`);
+      });
+
+      renderPlayers();
+      saveState();
+    }
+
+    function renderPlayers() {
+      const list = document.getElementById('player-list');
+      if (players.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: #999; padding: 20px; font-size: 13px;">No players added yet</div>';
+        return;
+      }
+
+      list.innerHTML = players.map(p => `
+        <div class="player-item ${p.selected ? 'selected' : ''}">
+          <input type="checkbox" ${p.selected ? 'checked' : ''} onchange="togglePlayerSelection(${p.id})">
+          <div class="player-name">${p.name}</div>
+          <div class="player-status">
+            ${p.drunk ? '<span class="status-badge status-drunk">Drunk</span>' : ''}
+            ${p.poisoned ? '<span class="status-badge status-poisoned">Poison</span>' : ''}
+            ${p.dead ? '<span class="status-badge status-dead">Dead</span>' : ''}
+          </div>
+          <button onclick="removePlayer(${p.id})" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 0 4px; color: #999;">×</button>
+        </div>
+      `).join('');
+    }
+
+    function logDecision(text, isOverride = false) {
+      const timestamp = new Date().toLocaleTimeString();
+      decisionLog.unshift({
+        time: timestamp,
+        text: text,
+        override: isOverride
+      });
+
+      if (decisionLog.length > 50) decisionLog = decisionLog.slice(0, 50);
+      
+      renderLog();
+      saveState();
+    }
+
+    function renderLog() {
+      const logEl = document.getElementById('decision-log');
+      if (decisionLog.length === 0) {
+        logEl.innerHTML = '<div class="log-entry" style="color: #999; font-style: italic;">No decisions yet...</div>';
+        return;
+      }
+
+      logEl.innerHTML = decisionLog.map(entry => `
+        <div class="log-entry ${entry.override ? 'log-override' : ''}">
+          <strong>${entry.time}</strong> — ${entry.text}
+        </div>
+      `).join('');
+    }
+
+    function clearLog() {
+      if (!confirm('Clear all decision logs?')) return;
+      decisionLog = [];
+      renderLog();
+      saveState();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // NUMBER GENERATOR
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    function setRange(min, max) {
+      document.getElementById('min').value = min;
+      document.getElementById('max').value = max;
+    }
+
+    function generate() {
+      const min = Number(document.getElementById('min').value);
+      const max = Number(document.getElementById('max').value);
+      const result = document.getElementById('result');
+      
+      if (isNaN(min) || isNaN(max) || min > max) {
+        result.textContent = "Invalid range";
+        result.className = "error";
+        return;
+      }
+      
+      result.className = "";
+      const value = Math.floor(Math.random() * (max - min + 1)) + min;
+      result.textContent = value;
+      
+      logDecision(`Generated number: ${value} (range: ${min}-${max})`);
+    }
+
+    function overrideResult() {
+      const overrideInput = document.getElementById('override-value');
+      const value = Number(overrideInput.value);
+      const result = document.getElementById('result');
+      
+      if (isNaN(value)) {
+        alert('Enter a valid number');
+        return;
+      }
+
+      const min = Number(document.getElementById('min').value);
+      const max = Number(document.getElementById('max').value);
+      
+      if (value < min || value > max) {
+        if (!confirm(`${value} is outside range ${min}-${max}. Override anyway?`)) return;
+      }
+      
+      result.className = "";
+      result.textContent = value;
+      overrideInput.value = '';
+      
+      logDecision(`🎭 OVERRIDE: Forced result to ${value}`, true);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COIN FLIP
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    let flipping = false;
+
+    function flipCoin() {
+      if (flipping) return;
+      flipping = true;
+      
+      const coin = document.getElementById("coin");
+      const label = document.getElementById("coin-label");
+      const flipBtn = document.getElementById("flip-btn");
+      const isHeads = Math.random() < 0.5;
+      
+      coin.style.setProperty("--end-rot", (isHeads ? 1440 : 1620) + "deg");
+      coin.classList.remove("land-heads", "land-tails", "flipping");
+      label.textContent = "...";
+      flipBtn.disabled = true;
+      
+      void coin.offsetWidth;
+      coin.classList.add("flipping");
+      
+      setTimeout(() => {
+        coin.classList.remove("flipping");
+        coin.classList.add(isHeads ? "land-heads" : "land-tails");
+        label.textContent = isHeads ? "Heads!" : "Tails!";
+        flipBtn.disabled = false;
+        flipping = false;
+        
+        logDecision(`Flipped coin: ${isHeads ? 'Heads' : 'Tails'}`);
+      }, 950);
+    }
+
+    function forceCoinResult(result) {
+      if (flipping) return;
+      flipping = true;
+      
+      const coin = document.getElementById("coin");
+      const label = document.getElementById("coin-label");
+      const flipBtn = document.getElementById("flip-btn");
+      const isHeads = result === 'heads';
+      
+      coin.style.setProperty("--end-rot", (isHeads ? 1440 : 1620) + "deg");
+      coin.classList.remove("land-heads", "land-tails", "flipping");
+      label.textContent = "...";
+      flipBtn.disabled = true;
+      
+      void coin.offsetWidth;
+      coin.classList.add("flipping");
+      
+      setTimeout(() => {
+        coin.classList.remove("flipping");
+        coin.classList.add(isHeads ? "land-heads" : "land-tails");
+        label.textContent = isHeads ? "Heads!" : "Tails!";
+        flipBtn.disabled = false;
+        flipping = false;
+        
+        logDecision(`🎭 OVERRIDE: Forced coin to ${result}`, true);
+      }, 950);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MAGIC 8 BALL (simplified)
+    // ═══════════════════════════════════════════════════════════════════════════
+
     const ANSWERS = [
-      { text: "It is certain",        cat: "positive" },
-      { text: "It is decidedly so",   cat: "positive" },
-      { text: "Without a doubt",      cat: "positive" },
-      { text: "Yes, definitely",      cat: "positive" },
-      { text: "You may rely on it",   cat: "positive" },
-      { text: "As I see it, yes",     cat: "positive" },
-      { text: "Most likely",          cat: "positive" },
-      { text: "Outlook good",         cat: "positive" },
-      { text: "Yes",                  cat: "positive" },
-      { text: "Signs point to yes",   cat: "positive" },
-      { text: "Reply hazy, try again",cat: "neutral"  },
-      { text: "Ask again later",      cat: "neutral"  },
-      { text: "Better not tell you",  cat: "neutral"  },
-      { text: "Cannot predict now",   cat: "neutral"  },
+      { text: "It is certain", cat: "positive" },
+      { text: "It is decidedly so", cat: "positive" },
+      { text: "Without a doubt", cat: "positive" },
+      { text: "Yes, definitely", cat: "positive" },
+      { text: "You may rely on it", cat: "positive" },
+      { text: "As I see it, yes", cat: "positive" },
+      { text: "Most likely", cat: "positive" },
+      { text: "Outlook good", cat: "positive" },
+      { text: "Yes", cat: "positive" },
+      { text: "Signs point to yes", cat: "positive" },
+      { text: "Reply hazy, try again", cat: "neutral" },
+      { text: "Ask again later", cat: "neutral" },
+      { text: "Better not tell you", cat: "neutral" },
+      { text: "Cannot predict now", cat: "neutral" },
       { text: "Concentrate and ask again", cat: "neutral" },
-      { text: "Don't count on it",    cat: "negative" },
-      { text: "My reply is no",       cat: "negative" },
-      { text: "My sources say no",    cat: "negative" },
-      { text: "Outlook not so good",  cat: "negative" },
-      { text: "Very doubtful",        cat: "negative" },
+      { text: "Don't count on it", cat: "negative" },
+      { text: "My reply is no", cat: "negative" },
+      { text: "My sources say no", cat: "negative" },
+      { text: "Outlook not so good", cat: "negative" },
+      { text: "Very doubtful", cat: "negative" }
     ];
 
     const CAT_COLORS = { positive: "#27ae60", neutral: "#e67e22", negative: "#e74c3c" };
 
-    // ── Physics Ball ───────────────────────────────────────────────────────────
-    const BALL_R      = 60;
-    const SPRING_K    = 0.10;  // spring pull toward center
-    const SPRING_DAMP = 0.75;  // damping (lower = bouncier return)
-    const SETTLE_DIST = 0.5;   // px from center to snap
-    const SETTLE_SPD  = 0.4;
+    const BALL_R = 60, SPRING_K = 0.10, SPRING_DAMP = 0.75;
+    const arena = document.getElementById("magic-arena");
+    const ballEl = document.getElementById("ball-el");
+    const shadowEl = document.getElementById("ball-shadow");
 
-    const arena   = document.getElementById("magic-arena");
-    const ballEl  = document.getElementById("ball-el");
-    const shadowEl= document.getElementById("ball-shadow");
+    let bx, by, vx = 0, vy = 0, dragging = false, rafId = null;
+    let answerRevealed = false, returning = false;
 
-    let bx, by, vx = 0, vy = 0;
-    let dragging = false;
-    let dragOffX, dragOffY;
-    let prevDragX, prevDragY, prevDragT;
-    let rafId = null;
-    let answerRevealed = false;
-    let settleTimer = null;
-    let returning = false;
-
-    function arenaSize() {
-      return { w: arena.clientWidth, h: arena.clientHeight };
-    }
+    function arenaSize() { return { w: arena.clientWidth, h: arena.clientHeight }; }
 
     function initBallPos() {
       const { w, h } = arenaSize();
-      bx = w / 2;
-      by = h / 2;
-      vx = 0; vy = 0;
+      bx = w / 2; by = h / 2; vx = 0; vy = 0;
       returning = false;
       renderBall();
     }
@@ -402,20 +1322,18 @@
     function renderBall() {
       const { w, h } = arenaSize();
       ballEl.style.left = (bx - BALL_R) + "px";
-      ballEl.style.top  = (by - BALL_R) + "px";
+      ballEl.style.top = (by - BALL_R) + "px";
 
-      // Shadow shrinks the further the ball is from center
       const cx = w / 2, cy = h / 2;
       const dist = Math.hypot(bx - cx, by - cy);
       const maxDist = Math.hypot(cx, cy);
       const t = Math.min(dist / maxDist, 1);
       const scale = 1 - t * 0.55;
-      const sw = BALL_R * 2 * scale;
-      const sh = BALL_R * 0.35 * scale;
-      shadowEl.style.width   = sw + "px";
-      shadowEl.style.height  = sh + "px";
-      shadowEl.style.left    = (bx - sw / 2) + "px";
-      shadowEl.style.top     = (by + BALL_R * 0.75 - sh / 2) + "px";
+      const sw = BALL_R * 2 * scale, sh = BALL_R * 0.35 * scale;
+      shadowEl.style.width = sw + "px";
+      shadowEl.style.height = sh + "px";
+      shadowEl.style.left = (bx - sw / 2) + "px";
+      shadowEl.style.top = (by + BALL_R * 0.75 - sh / 2) + "px";
       shadowEl.style.opacity = (0.15 + 0.28 * scale).toString();
     }
 
@@ -424,26 +1342,19 @@
 
       const { w, h } = arenaSize();
       const cx = w / 2, cy = h / 2;
-
-      // Spring toward center
       vx = (vx + (cx - bx) * SPRING_K) * SPRING_DAMP;
       vy = (vy + (cy - by) * SPRING_K) * SPRING_DAMP;
-      bx += vx;
-      by += vy;
-
+      bx += vx; by += vy;
       renderBall();
 
       const distToCenter = Math.hypot(bx - cx, by - cy);
       const speed = Math.sqrt(vx * vx + vy * vy);
 
-      if (distToCenter < SETTLE_DIST && speed < SETTLE_SPD) {
+      if (distToCenter < 0.5 && speed < 0.4) {
         bx = cx; by = cy; vx = 0; vy = 0;
         renderBall();
         rafId = null;
-        if (returning) {
-          returning = false;
-          revealAnswer();
-        }
+        if (returning) { returning = false; revealAnswer(); }
         return;
       }
 
@@ -455,101 +1366,12 @@
       rafId = requestAnimationFrame(physicsStep);
     }
 
-    function getEventPos(e) {
-      if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      return { x: e.clientX, y: e.clientY };
-    }
-
-    function onPointerDown(e) {
-      e.preventDefault();
-      const rect = arena.getBoundingClientRect();
-      const { x, y } = getEventPos(e);
-      const lx = x - rect.left;
-      const ly = y - rect.top;
-      // Hit-test: only drag if within the ball
-      if (Math.hypot(lx - bx, ly - by) > BALL_R + 8) return;
-
-      dragging = true;
-      dragOffX = lx - bx;
-      dragOffY = ly - by;
-      prevDragX = lx; prevDragY = ly; prevDragT = Date.now();
-      vx = 0; vy = 0;
-
-      // Hide answer when picked up
-      hideAnswer();
-
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(physicsStep);
-      ballEl.style.transition = 'none';
-    }
-
-    function onPointerMove(e) {
-      if (!dragging) return;
-      e.preventDefault();
-      const rect = arena.getBoundingClientRect();
-      const { x, y } = getEventPos(e);
-      const lx = x - rect.left;
-      const ly = y - rect.top;
-
-      const now = Date.now();
-      const dt  = Math.max(1, now - prevDragT);
-
-      // Velocity from drag (px/frame at 60fps)
-      vx = (lx - prevDragX) / dt * 16;
-      vy = (ly - prevDragY) / dt * 16;
-
-      prevDragX = lx; prevDragY = ly; prevDragT = now;
-
-      bx = lx - dragOffX;
-      by = ly - dragOffY;
-
-      // Clamp inside arena
-      const { w, h } = arenaSize();
-      bx = Math.max(BALL_R, Math.min(w - BALL_R, bx));
-      by = Math.max(BALL_R, Math.min(h - BALL_R, by));
-    }
-
-    function onPointerUp(e) {
-      if (!dragging) return;
-      dragging = false;
-
-      const { w, h } = arenaSize();
-      const cx = w / 2, cy = h / 2;
-      const distFromCenter = Math.hypot(bx - cx, by - cy);
-
-      // If dragged far enough from center, spring back and reveal answer on arrival
-      if (distFromCenter > BALL_R * 0.5) {
-        returning = true;
-        hideAnswer();
-      }
-
-      vx *= 0.3; vy *= 0.3; // kill throw momentum — we want smooth spring return
-      startPhysics();
-    }
-
-    // Mouse events
-    arena.addEventListener("mousedown",  onPointerDown);
-    window.addEventListener("mousemove", onPointerMove);
-    window.addEventListener("mouseup",   onPointerUp);
-
-    // Touch events
-    arena.addEventListener("touchstart", onPointerDown, { passive: false });
-    window.addEventListener("touchmove", onPointerMove, { passive: false });
-    window.addEventListener("touchend",  onPointerUp);
-
-    // Click on ball when not dragging → trigger answer
-    ballEl.addEventListener("click", () => {
-      if (Math.abs(vx) < 0.5 && Math.abs(vy) < 0.5) {
-        triggerAsk();
-      }
-    });
-
-    // Reveal / hide answer
     function revealAnswer() {
       if (answerRevealed) return;
       answerRevealed = true;
       const pick = ANSWERS[Math.floor(Math.random() * ANSWERS.length)];
-      document.getElementById("magic-answer").textContent  = pick.text;
+      
+      document.getElementById("magic-answer").textContent = pick.text;
       document.getElementById("magic-answer").classList.add("visible");
 
       const overlay = document.getElementById("magic-answer-overlay");
@@ -557,8 +1379,11 @@
       overlay.classList.add("visible");
 
       const catEl = document.getElementById("magic-category");
-      catEl.textContent  = pick.cat.toUpperCase();
-      catEl.style.color  = CAT_COLORS[pick.cat];
+      catEl.textContent = pick.cat.toUpperCase();
+      catEl.style.color = CAT_COLORS[pick.cat];
+
+      const question = document.getElementById("magic-question").value || "Unknown";
+      logDecision(`Magic 8 Ball: "${question}" → ${pick.text} (${pick.cat})`);
     }
 
     function hideAnswer() {
@@ -569,7 +1394,6 @@
       document.getElementById("magic-category").textContent = "";
     }
 
-    // "Ask" button / click: fling ball out then spring back → reveal on return
     function triggerAsk() {
       hideAnswer();
       returning = true;
@@ -578,141 +1402,62 @@
       startPhysics();
     }
 
-    // ── Shake toast ────────────────────────────────────────────────────────────
-    let toastTimer = null;
-    function showShakeToast() {
-      const toast = document.getElementById("shake-toast");
-      toast.classList.add("show");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
-    }
+    ballEl.addEventListener("click", () => {
+      if (Math.abs(vx) < 0.5 && Math.abs(vy) < 0.5) triggerAsk();
+    });
 
-    function shake8Ball(fromDevice) {
-      if (fromDevice) showShakeToast();
-      hideAnswer();
-      returning = true;
-      vx = (Math.random() - 0.5) * 20;
-      vy = (Math.random() - 0.5) * 20;
-      startPhysics();
-    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    // UI CONTROLS
+    // ═══════════════════════════════════════════════════════════════════════════
 
-    // ── Device Motion Shake Detection ─────────────────────────────────────────
-    const SHAKE_THRESHOLD = 18;
-    const SHAKE_COOLDOWN  = 1200;
-    let lastShakeTime = 0;
-    let lastAcc = { x: null, y: null, z: null };
-
-    function handleMotion(e) {
-      const acc = e.accelerationIncludingGravity || e.acceleration;
-      if (!acc) return;
-      const { x, y, z } = acc;
-      if (lastAcc.x === null) { lastAcc = { x, y, z }; return; }
-      const delta = Math.abs(x - lastAcc.x) + Math.abs(y - lastAcc.y) + Math.abs(z - lastAcc.z);
-      lastAcc = { x, y, z };
-      const now = Date.now();
-      if (delta > SHAKE_THRESHOLD && now - lastShakeTime > SHAKE_COOLDOWN) {
-        lastShakeTime = now;
-        if (document.getElementById("panel-magic").classList.contains("active")) {
-          shake8Ball(true);
-        }
-      }
-    }
-
-    function startDeviceMotion() {
-      window.addEventListener("devicemotion", handleMotion, { passive: true });
-      document.getElementById("magic-hint").textContent = "Drag & release or shake your device — answer reveals on return";
-      document.getElementById("shake-permission-btn").classList.remove("visible");
-    }
-
-    function requestShakePermission() {
-      if (typeof DeviceMotionEvent !== "undefined" &&
-          typeof DeviceMotionEvent.requestPermission === "function") {
-        DeviceMotionEvent.requestPermission()
-          .then(state => { if (state === "granted") startDeviceMotion(); })
-          .catch(console.warn);
-      } else {
-        startDeviceMotion();
-      }
-    }
-
-    (function initShake() {
-      if (typeof DeviceMotionEvent === "undefined") {
-        document.getElementById("magic-hint").textContent = "Drag the ball and let go — it'll snap back with your answer";
-        return;
-      }
-      if (typeof DeviceMotionEvent.requestPermission === "function") {
-        document.getElementById("shake-permission-btn").classList.add("visible");
-        document.getElementById("magic-hint").textContent = "Enable shake, or drag & release the ball";
-      } else {
-        startDeviceMotion();
-      }
-    })();
-
-
-    // ── Dark mode ──────────────────────────────────────────────────────────────
-    const toggleBtn = document.getElementById("toggleBtn");
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      document.body.classList.add("dark");
-      toggleBtn.textContent = "☀️ Light";
-    }
     function toggleDark() {
       document.body.classList.toggle("dark");
-      toggleBtn.textContent = document.body.classList.contains("dark") ? "☀️ Light" : "🌙 Dark";
+      const btn = document.getElementById("toggleBtn");
+      btn.textContent = document.body.classList.contains("dark") ? "☀️ Light" : "🌙 Dark";
     }
 
-    // ── Tab switching ──────────────────────────────────────────────────────────
     function switchTab(name, el) {
       document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
       el.classList.add("active");
       document.getElementById("panel-" + name).classList.add("active");
-      if (name === "magic") { requestAnimationFrame(() => { initBallPos(); startPhysics(); }); }
+      
+      if (name === "magic") {
+        requestAnimationFrame(() => { initBallPos(); startPhysics(); });
+      }
     }
 
-    // Init ball when page loads (arena may be hidden, use rAF after first render)
-    window.addEventListener("load", () => {
-      // Only init if magic tab is default visible — it's not, so we init on first switch
-      // But if someone directly opens the magic panel, handle it:
-      if (document.getElementById("panel-magic").classList.contains("active")) {
-        requestAnimationFrame(() => { initBallPos(); startPhysics(); });
+    // Drag & drop for file upload
+    const uploadArea = document.getElementById('upload-area');
+    
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        const event = { target: { files: [file] } };
+        handleFileUpload(event);
       }
     });
 
-    // ── Number Generator ───────────────────────────────────────────────────────
-    function generate() {
-      const min = Number(document.getElementById("min").value);
-      const max = Number(document.getElementById("max").value);
-      const result = document.getElementById("result");
-      if (isNaN(min) || isNaN(max) || min > max) {
-        result.textContent = "Invalid range"; result.className = "error"; return;
-      }
-      result.className = "";
-      result.textContent = Math.floor(Math.random() * (max - min + 1)) + min;
+    // Initialize dark mode
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      document.body.classList.add("dark");
+      document.getElementById("toggleBtn").textContent = "☀️ Light";
     }
 
-    // ── Coin Flip ──────────────────────────────────────────────────────────────
-    let flipping = false;
-    function flipCoin() {
-      if (flipping) return;
-      flipping = true;
-      const coin = document.getElementById("coin");
-      const label = document.getElementById("coin-label");
-      const flipBtn = document.getElementById("flip-btn");
-      const isHeads = Math.random() < 0.5;
-      coin.style.setProperty("--end-rot", (isHeads ? 1440 : 1620) + "deg");
-      coin.classList.remove("land-heads", "land-tails", "flipping");
-      label.textContent = "...";
-      flipBtn.disabled = true;
-      void coin.offsetWidth;
-      coin.classList.add("flipping");
-      setTimeout(() => {
-        coin.classList.remove("flipping");
-        coin.classList.add(isHeads ? "land-heads" : "land-tails");
-        label.textContent = isHeads ? "Heads!" : "Tails!";
-        flipBtn.disabled = false;
-        flipping = false;
-      }, 950);
-    }
+    // Load saved state on startup
+    loadState();
   </script>
 </body>
 </html>
