@@ -89,6 +89,127 @@
     body.dark button.secondary-btn { border-color: #2899f5; color: #2899f5; }
     body.dark button.secondary-btn:hover { background: #2899f5; color: white; }
 
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideIn 0.3s ease-out;
+      color: #111;
+    }
+
+    body.dark .modal-content {
+      background: #1f222e;
+      color: #e0e0e0;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    body.dark .modal-header {
+      border-bottom-color: #2a2e3d;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body.dark .modal-close {
+      color: #aaa;
+    }
+
+    .modal-close:hover {
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+
+    body.dark .modal-close:hover {
+      background: #2a2e3d;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .mini-btn {
+      padding: 8px 12px;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .mini-btn:hover {
+      background-color: #f0f0f0;
+      border-color: #999;
+    }
+
+    body.dark .mini-btn {
+      background-color: #2a2e3d;
+      border-color: #3a3e4d;
+      color: white;
+    }
+
+    body.dark .mini-btn:hover {
+      background-color: #3a3e4d;
+      border-color: #4a4e5d;
+    }
+
     #result { margin-top: 18px; font-size: 32px; font-weight: 700; min-height: 40px; color: #0078d4; }
     body.dark #result { color: #2899f5; }
     .error { color: #d13438; font-size: 16px; }
@@ -468,6 +589,39 @@
       background: #0078d4; color: white; white-space: nowrap;
     }
 
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 10px 12px;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .input-row label {
+      font-weight: 600;
+      min-width: 120px;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .input-row input[type="number"] {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      min-width: 100px;
+    }
+
+    .input-row input[type="number"]:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 4px rgba(52, 152, 219, 0.3);
+    }
+
     .magic-hint { font-size: 12px; color: #aaa; margin-top: 8px; }
     body.dark .magic-hint { color: #555; }
 
@@ -490,7 +644,6 @@
     <div class="tabs">
       <button class="tab active" onclick="switchTab('script', this)">📜 Script</button>
       <button class="tab" onclick="switchTab('bot', this)">🤖 Bot</button>
-      <button class="tab" onclick="switchTab('storyteller', this)">🎭 Players</button>
       <button class="tab" onclick="switchTab('number', this)">🔢 RNG</button>
       <button class="tab" onclick="switchTab('coin', this)">🪙 Coin</button>
       <button class="tab" onclick="switchTab('magic', this)">🎱 Magic</button>
@@ -515,6 +668,7 @@
         <button class="preset-btn" onclick="loadBuiltInScript('tb')">Trouble Brewing</button>
         <button class="preset-btn" onclick="loadBuiltInScript('bmr')">Bad Moon Rising</button>
         <button class="preset-btn" onclick="loadBuiltInScript('snv')">Sects & Violets</button>
+        <button class="preset-btn" style="background: #ef4444; border-color: #ef4444; color: white;" onclick="clearScript()">Clear Script</button>
       </div>
 
       <div id="script-display"></div>
@@ -529,6 +683,16 @@
       </div>
 
       <div id="bot-character-select" style="display: none;">
+        <h3>Game Setup</h3>
+        <div class="input-row">
+          <label>Total Players:</label>
+          <input type="number" id="bot-total-players" min="3" max="20" value="5" onchange="saveBotState()">
+        </div>
+        <div class="input-row">
+          <label>Dead Players:</label>
+          <input type="number" id="bot-dead-players" min="0" max="20" value="0" onchange="saveBotState()">
+        </div>
+
         <h3>Select Bot Character</h3>
         <div id="bot-character-grid" class="character-grid"></div>
       </div>
@@ -540,42 +704,24 @@
             <span id="bot-char-name"></span>
           </div>
           <div class="ability-text" id="bot-ability"></div>
-          <button class="action-btn" onclick="checkBotAction()">Check Night Action</button>
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button class="action-btn" onclick="checkBotAction()">Check Night Action</button>
+            <button class="action-btn" onclick="showDecisionHelper()" style="background-color: #9b59b6;">Decision Helper</button>
+          </div>
           <div class="action-result" id="bot-action-result" style="display: none;"></div>
         </div>
       </div>
-    </div>
 
-    <!-- Storyteller Panel -->
-    <div class="tab-panel" id="panel-storyteller">
-      <h2>Storyteller Controls</h2>
-      
-      <div class="info-box">
-        <strong>Bot Player Mode:</strong> Manage game state and make fair decisions for the bot player. All actions are logged for transparency.
+      <!-- Decision Helper Modal -->
+      <div id="decision-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+          <div class="modal-header">
+            <h3>📋 Decision Helper</h3>
+            <button class="modal-close" onclick="closeDecisionModal()">×</button>
+          </div>
+          <div id="decision-options" class="modal-body"></div>
+        </div>
       </div>
-
-      <h3>Players in Game</h3>
-      <div class="add-player-row">
-        <input type="text" id="new-player-name" placeholder="Player name..." onkeydown="if(event.key==='Enter') addPlayer()">
-        <button onclick="addPlayer()">Add</button>
-      </div>
-
-      <div class="player-list" id="player-list"></div>
-
-      <h3>Quick Actions</h3>
-      <div class="preset-buttons">
-        <button class="preset-btn" onclick="markSelectedAs('drunk')">🍺 Drunk</button>
-        <button class="preset-btn" onclick="markSelectedAs('poisoned')">☠️ Poison</button>
-        <button class="preset-btn" onclick="markSelectedAs('dead')">💀 Dead</button>
-        <button class="preset-btn" onclick="clearSelectedStatus()">✨ Clear</button>
-      </div>
-
-      <h3>Decision Log</h3>
-      <div class="decision-log" id="decision-log">
-        <div class="log-entry" style="color: #999; font-style: italic;">No decisions yet...</div>
-      </div>
-
-      <button class="secondary-btn" onclick="clearLog()" style="margin-top: 12px;">Clear Log</button>
     </div>
 
     <!-- Number Generator -->
@@ -670,10 +816,190 @@
     // GAME STATE MANAGEMENT
     // ═══════════════════════════════════════════════════════════════════════════
     
-    let players = [];
     let decisionLog = [];
     let currentScript = null;
     let botCharacter = null;
+    let botTotalPlayers = 5;    // Total players in game
+    let botDeadPlayers = 0;     // Dead players
+    let characterWikiCache = {}; // Cache for fetched wiki data
+
+    // Built-in character database (fetched from wiki and cached)
+    const CHARACTER_DATABASE = {
+      investigator: { name: "Investigator", team: "townsfolk", ability: "You start knowing that 1 of 2 players is a particular Minion.", firstNight: 37, otherNights: 0 },
+      clockmaker: { name: "Clockmaker", team: "townsfolk", ability: "You start knowing how many steps from the Demon to its nearest Minion.", firstNight: 35, otherNights: 0 },
+      empath: { name: "Empath", team: "townsfolk", ability: "Each night, you learn how many of your 2 alive neighbours are evil.", firstNight: 41, otherNights: 58 },
+      fortuneteller: { name: "Fortune Teller", team: "townsfolk", ability: "Each night, choose 2 players: you learn if either is a Demon. There is a good player that registers as a Demon to you.", firstNight: 42, otherNights: 59 },
+      preacher: { name: "Preacher", team: "townsfolk", ability: "You start knowing 1 Minion.", firstNight: 33, otherNights: 0 },
+      professor: { name: "Professor", team: "townsfolk", ability: "If a Minion dies by execution, you learn that it's true, even if false.", firstNight: 0, otherNights: 62 },
+      cannibal: { name: "Cannibal", team: "townsfolk", ability: "You have the ability of the recently killed player.", firstNight: 0, otherNights: 0 },
+      mathematician: { name: "Mathematician", team: "townsfolk", ability: "Each night, you learn how many players' characters are 'alive'.", firstNight: 44, otherNights: 60 },
+      librarian: { name: "Librarian", team: "townsfolk", ability: "You start knowing that 1 of 2 players is a particular Outsider, or that zero are in play.", firstNight: 38, otherNights: 0 },
+      chef: { name: "Chef", team: "townsfolk", ability: "You start knowing how many pairs of evil players there are.", firstNight: 40, otherNights: 0 },
+      ravenkeeper: { name: "Ravenkeeper", team: "townsfolk", ability: "If you die at night, you're woken to choose a player: you learn their character.", firstNight: 0, otherNights: 50 },
+      towncrier: { name: "Town Crier", team: "townsfolk", ability: "You start knowing that 1 of 2 players is an Outsider & 1 of 2 players is a Minion.", firstNight: 36, otherNights: 0 },
+      seamstress: { name: "Seamstress", team: "townsfolk", ability: "You start knowing that 2 of your 3 alive neighbours are evil.", firstNight: 45, otherNights: 0 },
+      fisherman: { name: "Fisherman", team: "townsfolk", ability: "Each day, you may announce a character: it is evil, or you're drunk.", firstNight: 0, otherNights: 0 },
+      tealady: { name: "Tea Lady", team: "townsfolk", ability: "If both your alive neighbours are good, you can not die by execution.", firstNight: 0, otherNights: 0 },
+      plaguedoctor: { name: "Plague Doctor", team: "townsfolk", ability: "If you would die, the Storyteller chooses a player (alive, evil & not you): they die instead.", firstNight: 0, otherNights: 46 },
+      moonchild: { name: "Moonchild", team: "townsfolk", ability: "Each night, you learn the character of an alive player of your choice. Then the Demon learns who you chose.", firstNight: 0, otherNights: 61 },
+      scarletwoman: { name: "Scarlet Woman", team: "minion", ability: "If there are 5 or more players alive & the Demon dies, you become the Demon.", firstNight: 27, otherNights: 0 },
+      imp: { name: "Imp", team: "minion", ability: "Each night*, choose a player: they die. If you kill yourself this way, a Minion becomes the Imp.", firstNight: 16, otherNights: 48 },
+      poisoner: { name: "Poisoner", team: "minion", ability: "Each night, choose a player: they're poisoned tonight and tomorrow day.", firstNight: 26, otherNights: 47 },
+      spy: { name: "Spy", team: "minion", ability: "Each night, you see the Grimoire. You might register as good & as a Townsfolk or Outsider, even if dead.", firstNight: 28, otherNights: 49 },
+      devilsadvocate: { name: "Devil's Advocate", team: "minion", ability: "Each night, a player of your choice 'registers' as evil to the Storyteller & as non-evil to evil players.", firstNight: 0, otherNights: 51 },
+      cerenovus: { name: "Cerenovus", team: "minion", ability: "Players you choose are 'mad' about you until 3 alive players are mad about evil players.", firstNight: 0, otherNights: 52 },
+      goblin: { name: "Goblin", team: "minion", ability: "Each night, you become the player of your choice. If good players execute you form this role, you all win.", firstNight: 30, otherNights: 53 },
+      baron: { name: "Baron", team: "outsider", ability: "There are extra Outsiders in play. [+2 Outsiders]", firstNight: 0, otherNights: 0 },
+      drunk: { name: "Drunk", team: "outsider", ability: "You do not know you are the Drunk. You think you're a Townsfolk character, but you're not.", firstNight: 0, otherNights: 0 },
+      recluse: { name: "Recluse", team: "outsider", ability: "You might register as evil & as a Minion or Demon, even if dead.", firstNight: 0, otherNights: 0 },
+      saint: { name: "Saint", team: "outsider", ability: "If you die by execution, your team loses.", firstNight: 0, otherNights: 0 },
+      mutant: { name: "Mutant", team: "outsider", ability: "If you ever learn your character (including during setup), you die. The Storyteller may lie to you.", firstNight: 0, otherNights: 0 },
+      shabaloth: { name: "Shabaloth", team: "demon", ability: "Each night, you can kill a player. Minions you kill have 1 vote whilst dead.", firstNight: 15, otherNights: 54 },
+      ojo: { name: "Ojo", team: "demon", ability: "Each night, you choose a player: if they're good, they die. If they're evil, they don't.", firstNight: 14, otherNights: 55 },
+      po: { name: "Po", team: "demon", ability: "You can not be nominated. Minions can not die at night.", firstNight: 0, otherNights: 0 },
+      knaves: { name: "Knaves", team: "fabled", ability: "If you are in play, the Demon cannot die.", firstNight: 0, otherNights: 0 }
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // WIKI CHARACTER FETCHING
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    async function fetchCharacterFromWiki(characterId) {
+      // Check cache first
+      if (characterWikiCache[characterId]) {
+        return characterWikiCache[characterId];
+      }
+
+      // Check built-in database first (helps with offline mode)
+      if (CHARACTER_DATABASE[characterId]) {
+        const dbData = CHARACTER_DATABASE[characterId];
+        const result = {
+          name: dbData.name,
+          description: dbData.ability,
+          ability: dbData.ability,
+          team: dbData.team,
+          firstNight: dbData.firstNight,
+          otherNights: dbData.otherNights,
+          wikiUrl: `https://wiki.bloodontheclocktower.com/${dbData.name.replace(/ /g, '_')}`
+        };
+        characterWikiCache[characterId] = result;
+        return result;
+      }
+
+      try {
+        // Convert character ID to proper wiki format
+        // "clockmaker" -> "Clockmaker", "devilsadvocate" -> "Devil's_Advocate"
+        let wikiPageName = characterId
+          .split(/(?=[A-Z])/)
+          .map((word, i) => i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word)
+          .join('_');
+        
+        // Handle special cases
+        wikiPageName = wikiPageName
+          .replace(/(^|_)([a-z])/g, (match) => match.toUpperCase())
+          .replace(/Devil_S_Advocate/i, "Devil's_Advocate")
+          .replace(/Lil_Monsta/i, "Lil'_Monsta");
+
+        // Use MediaWiki API to fetch page content
+        const apiUrl = `https://wiki.bloodontheclocktower.com/w/api.php`;
+        
+        const parseResponse = await fetch(apiUrl + `?action=parse&page=${encodeURIComponent(wikiPageName)}&format=json&prop=text|categories|displaytitle`, {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!parseResponse.ok) {
+          console.warn(`Wiki API error for ${characterId}`);
+          return null;
+        }
+
+        const parseData = await parseResponse.json();
+
+        // Check for API errors
+        if (parseData.error) {
+          console.warn(`Wiki page not found for ${characterId}:`, parseData.error.info);
+          return null;
+        }
+
+        // Extract display title (proper name from wiki)
+        const displayTitle = parseData.parse?.displaytitle || wikiPageName.replace(/_/g, ' ');
+        
+        // Extract ability from parsed text - look for quoted text
+        let ability = "";
+        const html = parseData.parse?.text || "";
+        const abilityMatch = html.match(/<b>(?:Ability|Role)[:\s]*<\/b>[^<]*"([^"]{20,})"/i) ||
+                            html.match(/"([^"]{20,}[.!?])"/);
+        if (abilityMatch) {
+          ability = abilityMatch[1].trim().replace(/<[^>]+>/g, ''); // Remove HTML tags
+        }
+
+        // Extract team from categories
+        let team = "unknown";
+        const categories = parseData.parse?.categories || [];
+        for (const cat of categories) {
+          const catTitle = cat['*'].toLowerCase();
+          if (catTitle.includes('towns')) { team = 'townsfolk'; break; }
+          else if (catTitle.includes('outsider')) { team = 'outsider'; break; }
+          else if (catTitle.includes('minion')) { team = 'minion'; break; }
+          else if (catTitle.includes('demon')) { team = 'demon'; break; }
+          else if (catTitle.includes('traveller')) { team = 'traveller'; break; }
+          else if (catTitle.includes('fabled')) { team = 'fabled'; break; }
+        }
+
+        const result = {
+          name: displayTitle.replace(/<[^>]+>/g, ''), // Remove HTML tags
+          description: ability || "See wiki for details",
+          ability: ability,
+          team: team,
+          firstNight: 0, // Wiki API doesn't directly provide this, use database
+          otherNights: 0,
+          wikiUrl: `https://wiki.bloodontheclocktower.com/${wikiPageName}`
+        };
+        
+        // If we have database info, merge it for night order data
+        if (CHARACTER_DATABASE[characterId]) {
+          const dbData = CHARACTER_DATABASE[characterId];
+          result.firstNight = dbData.firstNight;
+          result.otherNights = dbData.otherNights;
+        }
+        
+        characterWikiCache[characterId] = result;
+        console.log(`Fetched ${characterId} from wiki API:`, result);
+        return result;
+        
+      } catch (error) {
+        console.warn(`Error fetching character ${characterId}:`, error);
+        
+        // Fallback: construct basic info from character ID
+        const name = characterId
+          .split(/(?=[A-Z])/)
+          .join(' ')
+          .split('_')
+          .join(' ')
+          .replace(/([a-z])([A-Z])/g, '$1 $2')
+          .replace(/\b\w/g, (l) => l.toUpperCase());
+
+        const result = {
+          name: name,
+          description: "Unable to fetch from wiki",
+          ability: "",
+          team: "unknown",
+          firstNight: 0,
+          otherNights: 0,
+          wikiUrl: `https://wiki.bloodontheclocktower.com/${name.replace(/ /g, '_')}`
+        };
+        
+        characterWikiCache[characterId] = result;
+        return result;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SCRIPT LOADING (MODIFIED)
+    // ═══════════════════════════════════════════════════════════════════════════
 
     // Built-in scripts (simplified versions)
     const BUILT_IN_SCRIPTS = {
@@ -773,27 +1099,38 @@
       const saved = localStorage.getItem('bongtools-state');
       if (saved) {
         const state = JSON.parse(saved);
-        players = state.players || [];
         decisionLog = state.log || [];
         currentScript = state.script || null;
         botCharacter = state.botCharacter || null;
-        renderPlayers();
+        botTotalPlayers = state.botTotalPlayers || 5;
+        botDeadPlayers = state.botDeadPlayers || 0;
         renderLog();
         if (currentScript) {
           renderScript();
           renderBotCharacterSelect();
           if (botCharacter) renderBotAction();
         }
+        document.getElementById('bot-total-players').value = botTotalPlayers;
+        document.getElementById('bot-dead-players').value = botDeadPlayers;
+        document.getElementById('bot-total-players').value = botTotalPlayers;
+        document.getElementById('bot-dead-players').value = botDeadPlayers;
       }
     }
 
     function saveState() {
       localStorage.setItem('bongtools-state', JSON.stringify({
-        players: players,
         log: decisionLog,
         script: currentScript,
-        botCharacter: botCharacter
+        botCharacter: botCharacter,
+        botTotalPlayers: botTotalPlayers,
+        botDeadPlayers: botDeadPlayers
       }));
+    }
+
+    function saveBotState() {
+      botTotalPlayers = parseInt(document.getElementById('bot-total-players').value) || 5;
+      botDeadPlayers = parseInt(document.getElementById('bot-dead-players').value) || 0;
+      saveState();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -821,28 +1158,62 @@
     }
 
     function parseJSONScript(content) {
-      const data = JSON.parse(content);
-      
-      // Handle clocktower.online JSON format
-      currentScript = {
-        name: data.name || data.id || "Custom Script",
-        author: data.author || "Unknown",
-        characters: data.map(char => ({
-          id: char.id,
-          name: char.name || char.id,
-          team: char.team,
-          ability: char.ability || "",
-          firstNight: char.firstNight || 0,
-          otherNights: char.otherNights || 0
-        }))
+  const data = JSON.parse(content);
+  
+  // Handle clocktower.online JSON format where first element is metadata
+  let author = "Unknown";
+  let name = "Custom Script";
+  let characterData = data;
+  
+  if (data[0] && typeof data[0] === 'object' && data[0]._meta) {
+    // First element is metadata object
+    author = data[0].author || author;
+    name = data[0].name || name;
+    characterData = data.slice(1); // Skip metadata object
+  }
+  
+  currentScript = {
+    name: name,
+    author: author,
+    characters: characterData.map(char => {
+      // Handle both string IDs and object characters
+      const charId = typeof char === 'string' ? char : char.id;
+      return {
+        id: charId,
+        name: typeof char === 'string' ? charId : char.name || charId,
+        team: typeof char === 'object' ? char.team : "unknown",
+        ability: typeof char === 'object' ? char.ability || "" : "",
+        firstNight: typeof char === 'object' ? char.firstNight || 0 : 0,
+        otherNights: typeof char === 'object' ? char.otherNights || 0 : 0,
+        description: "",
+        wikiUrl: ""
       };
+    })
+  };
 
+  renderScript();
+  renderBotCharacterSelect();
+  
+  // Fetch wiki descriptions for each character
+  currentScript.characters.forEach(async (char) => {
+    const wikiData = await fetchCharacterFromWiki(char.id);
+    if (wikiData) {
+      char.name = wikiData.name;
+      char.description = wikiData.description;
+      char.ability = wikiData.ability || char.ability;
+      char.team = wikiData.team;
+      char.firstNight = wikiData.firstNight || char.firstNight;
+      char.otherNights = wikiData.otherNights || char.otherNights;
+      char.wikiUrl = wikiData.wikiUrl;
+      // Re-render to update with fetched data
       renderScript();
       renderBotCharacterSelect();
-      saveState();
-      logDecision(`Loaded script: ${currentScript.name}`);
     }
+  });
 
+  saveState();
+  logDecision(`Loaded script: ${currentScript.name}`);
+}
     function parseXMLScript(content) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(content, "text/xml");
@@ -878,8 +1249,18 @@
       logDecision(`Loaded script: ${currentScript.name}`);
     }
 
+    function clearScript() {
+      currentScript = null;
+      botCharacter = null;
+      document.getElementById('script-display').innerHTML = '';
+      renderBotCharacterSelect();
+      saveState();
+      logDecision(`Cleared script`);
+    }
+
     function renderScript() {
       const display = document.getElementById('script-display');
+      if (!display) return; // Exit if element doesn't exist
       if (!currentScript) {
         display.innerHTML = '';
         return;
@@ -891,11 +1272,16 @@
         minion: [],
         demon: [],
         traveller: [],
-        fabled: []
+        fabled: [],
+        unknown: []
       };
 
       currentScript.characters.forEach(char => {
-        if (byTeam[char.team]) byTeam[char.team].push(char);
+        if (byTeam[char.team]) {
+          byTeam[char.team].push(char);
+        } else {
+          byTeam.unknown.push(char);
+        }
       });
 
       let html = `
@@ -943,12 +1329,15 @@
 
       // Show modal with character details
       document.getElementById('modal-char-name').textContent = char.name;
-      document.getElementById('modal-char-details').innerHTML = `
+      let detailsHTML = `
         <p><strong>Team:</strong> ${char.team}</p>
-        <p><strong>Ability:</strong> ${char.ability}</p>
-        <p><strong>First Night:</strong> ${char.firstNight || 'None'}</p>
-        <p><strong>Other Nights:</strong> ${char.otherNights || 'None'}</p>
-      `;
+        <p><strong>Ability:</strong> ${char.ability}</p>`;
+      
+      if (char.wikiUrl) {
+        detailsHTML += `<p><a href="${char.wikiUrl}" target="_blank" style="color: #0078d4;">View on Wiki →</a></p>`;
+      }
+      
+      document.getElementById('modal-char-details').innerHTML = detailsHTML;
       document.getElementById('character-modal').classList.add('show');
     }
 
@@ -962,16 +1351,24 @@
 
     function renderBotCharacterSelect() {
       if (!currentScript) {
-        document.getElementById('no-script-message').style.display = 'block';
-        document.getElementById('bot-character-select').style.display = 'none';
-        document.getElementById('bot-action-display').style.display = 'none';
+        const noMsg = document.getElementById('no-script-message');
+        const botSel = document.getElementById('bot-character-select');
+        const botAct = document.getElementById('bot-action-display');
+        if (noMsg) noMsg.style.display = 'block';
+        if (botSel) botSel.style.display = 'none';
+        if (botAct) botAct.style.display = 'none';
         return;
       }
 
-      document.getElementById('no-script-message').style.display = 'none';
-      document.getElementById('bot-character-select').style.display = 'block';
-
+      const noMsg = document.getElementById('no-script-message');
+      const botSel = document.getElementById('bot-character-select');
       const grid = document.getElementById('bot-character-grid');
+      
+      if (!botSel || !grid) return; // Exit if required elements don't exist
+      
+      if (noMsg) noMsg.style.display = 'none';
+      botSel.style.display = 'block';
+
       grid.innerHTML = currentScript.characters.map(char => `
         <div class="character-card ${botCharacter?.id === char.id ? 'bot-character' : ''}" 
              onclick="selectBotCharacter('${char.id}')">
@@ -992,15 +1389,22 @@
     }
 
     function renderBotAction() {
+      const display = document.getElementById('bot-action-display');
+      const charNameEl = document.getElementById('bot-char-name');
+      const abilityEl = document.getElementById('bot-ability');
+      const resultEl = document.getElementById('bot-action-result');
+      
+      if (!display) return;
+      
       if (!botCharacter) {
-        document.getElementById('bot-action-display').style.display = 'none';
+        display.style.display = 'none';
         return;
       }
 
-      document.getElementById('bot-action-display').style.display = 'block';
-      document.getElementById('bot-char-name').textContent = botCharacter.name;
-      document.getElementById('bot-ability').textContent = botCharacter.ability;
-      document.getElementById('bot-action-result').style.display = 'none';
+      display.style.display = 'block';
+      if (charNameEl) charNameEl.textContent = botCharacter.name;
+      if (abilityEl) abilityEl.textContent = botCharacter.ability;
+      if (resultEl) resultEl.style.display = 'none';
     }
 
     function checkBotAction() {
@@ -1031,99 +1435,108 @@
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // PLAYER MANAGEMENT
+    // DECISION HELPER - Character-specific decision prompts
     // ═══════════════════════════════════════════════════════════════════════════
 
-    function addPlayer() {
-      const input = document.getElementById('new-player-name');
-      const name = input.value.trim();
-      if (!name) return;
+    function getDecisionPrompts(character) {
+      const team = character.team.toLowerCase();
+      const aliveCount = botTotalPlayers - botDeadPlayers;
       
-      players.push({
-        id: Date.now(),
-        name: name,
-        drunk: false,
-        poisoned: false,
-        dead: false,
-        selected: false
-      });
+      const prompts = {
+        townsfolk: [
+          { text: "Share information openly?", options: ["Claim role", "Share findings", "Stay quiet"] },
+          { text: "Trust another player's claim?", options: ["Trust immediately", "Ask questions", "Doubt them"] },
+          { text: "How to vote today?", options: ["Vote with majority", "Vote differently", "Abstain"] }
+        ],
+        outsider: [
+          { text: "How to explain suspicious role?", options: ["Lie about role", "Be vague", "Tell truth"] },
+          { text: "Should you claim?", options: ["Claim immediately", "Wait and see", "Never claim"] },
+          { text: "Team up with someone?", options: ["Find an ally", "Trust nobody", "Play along"] }
+        ],
+        minion: [
+          { text: "Defend the Demon?", options: ["Strong defense", "Subtle support", "Let them fend off"] },
+          { text: "Make a play today?", options: ["Make big play", "Lay low", "Create chaos"] },
+          { text: "How to coordinate?", options: ["Direct signals", "Subtle hints", "Act independently"] }
+        ],
+        demon: [
+          { text: "Who should you kill?", options: ["Kill information role", "Kill suspected accuser", "Kill random"] },
+          { text: "Play style today?", options: ["Aggressive claims", "Innocent act", "Mix it up"] },
+          { text: "Minion strategy?", options: ["Protect Minions", "Sacrifice one", "Play alone"] }
+        ],
+        fabled: [
+          { text: "How to present yourself?", options: ["Be helpful", "Be cryptic", "Be disruptive"] },
+          { text: "Interact openly?", options: ["Yes, freely", "Strategic moments", "Minimal interaction"] }
+        ]
+      };
+
+      return prompts[team] || prompts.townsfolk;
+    }
+
+    function showDecisionHelper() {
+      if (!botCharacter) return;
+
+      const prompts = getDecisionPrompts(botCharacter);
+      const modal = document.getElementById('decision-modal');
+      const optionsDiv = document.getElementById('decision-options');
+
+      let html = `<p style="color: #111; margin-bottom: 12px;"><strong style="font-size: 16px;">${botCharacter.name}</strong> <span style="color: #666; font-size: 14px;">(${botCharacter.team})</span></p>`;
       
-      input.value = '';
-      renderPlayers();
-      saveState();
-      logDecision(`Added player: ${name}`);
-    }
-
-    function removePlayer(id) {
-      const player = players.find(p => p.id === id);
-      players = players.filter(p => p.id !== id);
-      renderPlayers();
-      saveState();
-      if (player) logDecision(`Removed player: ${player.name}`);
-    }
-
-    function togglePlayerSelection(id) {
-      const player = players.find(p => p.id === id);
-      if (player) {
-        player.selected = !player.selected;
-        renderPlayers();
-      }
-    }
-
-    function markSelectedAs(status) {
-      const selected = players.filter(p => p.selected);
-      if (selected.length === 0) {
-        alert('Select players first');
-        return;
-      }
-
-      selected.forEach(p => {
-        p[status] = true;
-        logDecision(`Marked ${p.name} as ${status}`);
+      prompts.forEach((prompt, idx) => {
+        html += `
+          <div style="margin-bottom: 16px; padding: 12px; background-color: #f0e8ff; border-radius: 6px; border-left: 3px solid #9b59b6;">
+            <p style="font-weight: 600; margin: 0 0 8px 0; color: #3b2667;">${prompt.text}</p>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+        `;
+        
+        prompt.options.forEach(option => {
+          html += `<button class="mini-btn" onclick="selectDecision('${prompt.text}', '${option}', this)" style="text-align: left; padding: 8px 12px; background-color: white; color: #333; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 13px; transition: all 0.2s;">▶ ${option}</button>`;
+        });
+        
+        html += `</div></div>`;
       });
 
-      renderPlayers();
-      saveState();
+      optionsDiv.innerHTML = html;
+      modal.classList.add('show');
     }
 
-    function clearSelectedStatus() {
-      const selected = players.filter(p => p.selected);
-      if (selected.length === 0) {
-        alert('Select players first');
-        return;
+    function closeDecisionModal() {
+      const modal = document.getElementById('decision-modal');
+      modal.classList.remove('show');
+    }
+
+    function selectDecision(question, answer, element) {
+      // Visual feedback
+      element.style.backgroundColor = '#9b59b6';
+      element.style.color = 'white';
+      element.style.borderColor = '#9b59b6';
+
+      logDecision(`Bot decision (${botCharacter.name}): "${question}" → ${answer}`);
+
+      setTimeout(() => {
+        closeDecisionModal();
+      }, 500);
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+      const modal = document.getElementById('decision-modal');
+      if (event.target === modal) {
+        closeDecisionModal();
       }
+    });
 
-      selected.forEach(p => {
-        p.drunk = false;
-        p.poisoned = false;
-        p.dead = false;
-        logDecision(`Cleared status for ${p.name}`);
-      });
-
-      renderPlayers();
-      saveState();
-    }
-
-    function renderPlayers() {
-      const list = document.getElementById('player-list');
-      if (players.length === 0) {
-        list.innerHTML = '<div style="text-align: center; color: #999; padding: 20px; font-size: 13px;">No players added yet</div>';
-        return;
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeDecisionModal();
       }
+    });
 
-      list.innerHTML = players.map(p => `
-        <div class="player-item ${p.selected ? 'selected' : ''}">
-          <input type="checkbox" ${p.selected ? 'checked' : ''} onchange="togglePlayerSelection(${p.id})">
-          <div class="player-name">${p.name}</div>
-          <div class="player-status">
-            ${p.drunk ? '<span class="status-badge status-drunk">Drunk</span>' : ''}
-            ${p.poisoned ? '<span class="status-badge status-poisoned">Poison</span>' : ''}
-            ${p.dead ? '<span class="status-badge status-dead">Dead</span>' : ''}
-          </div>
-          <button onclick="removePlayer(${p.id})" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 0 4px; color: #999;">×</button>
-        </div>
-      `).join('');
-    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    // LOGGING & UTILITIES
+    // ═══════════════════════════════════════════════════════════════════════════
+
+
 
     function logDecision(text, isOverride = false) {
       const timestamp = new Date().toLocaleTimeString();
@@ -1141,6 +1554,8 @@
 
     function renderLog() {
       const logEl = document.getElementById('decision-log');
+      if (!logEl) return; // Exit if element doesn't exist
+      
       if (decisionLog.length === 0) {
         logEl.innerHTML = '<div class="log-entry" style="color: #999; font-style: italic;">No decisions yet...</div>';
         return;
